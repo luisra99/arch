@@ -1,9 +1,9 @@
 import { Router } from "express";
 import path from "path";
 import { cwd } from "process";
-import { logger } from "../utils/logger";
+import { logger } from "../../utils/logger";
 import fs from "fs";
-import { clearCache } from "../libs/cache";
+import { clearCache } from "../../libs/cache";
 const os = require("os");
 
 const router = Router();

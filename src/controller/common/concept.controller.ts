@@ -4,7 +4,7 @@ import {
   createNewConcept,
   getConceptByDenomination,
   getConceptsByFatherId,
-} from "../functions/concepts";
+} from "../../functions/concepts";
 
 const prisma = new PrismaClient();
 

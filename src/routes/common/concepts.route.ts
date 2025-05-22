@@ -5,9 +5,12 @@ import {
   deleteConcept,
   getConcepts,
   getConceptById,
-} from "../controller/concept.controller";
-import { resetCache, smartCache } from "../middlewares/smartCache.middleware";
-import { clearCacheMiddleware } from "../libs/cache";
+} from "../../controller/common/concept.controller";
+import {
+  resetCache,
+  smartCache,
+} from "../../middlewares/smartCache.middleware";
+import { clearCacheMiddleware } from "../../libs/cache";
 
 const router = Router();
 

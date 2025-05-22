@@ -1,10 +1,10 @@
 import AuthRoute from "./auth/routes";
-import ConceptRoute from "./routes/concepts.route";
-import OptionsRoute from "./routes/options.route";
-import Debug from "./routes/debug.route";
+import ConceptRoute from "./routes/common/concepts.route";
+import OptionsRoute from "./routes/common/options.route";
+import Debug from "./routes/common/debug.route";
 const os = require("os");
 
-import UserRoute from "./routes/users.route";
+import UserRoute from "./routes/common/users.route";
 import { authenticate } from "./auth/middlewares/auth.middleware";
 import { logger } from "./utils/logger";
 import { errorHandler } from "./middlewares/errorLogs.middleware";
