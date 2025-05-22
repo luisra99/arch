@@ -1,0 +1,17 @@
+{
+  "include": [
+    "src/**/*",
+    "prisma/**/*"
+  ],
+  "compilerOptions": {
+    "target": "es2020",               // Compilamos a una versión moderna de JS
+    "module": "commonjs",             
+    "outDir": "./dist",
+    "removeComments": true,           // Eliminar comentarios
+    "sourceMap": false,               // No generar mapas de fuente para hacer más difícil depurar
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmitOnError": true             // No emitir archivos si hay errores
+  }
+}

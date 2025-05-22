@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  seed     = "ts-node src/seed.ts"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Concept {
+  id                String              @id @default(uuid())
+  denomination      String
+  details           String?
+  fatherId          String?
+  deleted           DateTime?
+  conceptFather     Concept?            @relation("FatherConcept", fields: [fatherId], references: [id])
+  childConcept      Concept[]           @relation("FatherConcept")
+
+}
+model User {
+  id                           String              @id @default(uuid())
+  username                     String              @unique
+  password                     String
+  createdAt                    DateTime            @default(now())
+  updatedAt                    DateTime            @updatedAt
+  idRole                       String?
+  deleted                      DateTime?
+
+  Notification                 Notification[]
+}
+
+model Role {
+  id          String           @id @default(uuid())
+  name        String           @unique
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  type        String
+  dismissible Boolean  @default(true)
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+}

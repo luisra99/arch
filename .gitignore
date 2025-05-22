@@ -1,0 +1,6 @@
+dist
+node_modules
+dev-dist
+.husky
+package-lock.json
+logs
