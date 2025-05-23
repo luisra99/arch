@@ -53,7 +53,7 @@ export const sendUnattendedProspectsEmail = async () => {
       <td>${p.email || ""}</td>
       <td>${p.phone || ""}</td>
       <td>
-        <form action="${process.env.API_BASE_URL}/api/prospectos/${
+        <form action="${process.env.SERVER_URL}/prospect/${
         p.id
       }/atender" method="POST">
           <button type="submit" style="padding: 6px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px;">
