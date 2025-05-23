@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn src/index.ts",
-    "build": "npx depcheck && node esbuild.ts",
+    "build": "npx depcheck && node esbuild.ts && npx prisma generate",
     "start": "node esbuild.ts && set NODE_ENV=production && node dist/server.js",
     "prod": "node esbuild.ts && set NODE_ENV=production && pm2 start dist/server.js -i 1 --node-args='--max-old-space-size=512 --expose-gc' --name 'backend-w' --max-memory-restart 250M",
     "windows-prepare": "pm2 save && pm2 startup && pm2 startup windows && pm2 startup && pm2 list",
