@@ -2,6 +2,7 @@ import AuthRoute from "./auth/routes";
 import ConceptRoute from "./routes/common/concepts.route";
 import OptionsRoute from "./routes/common/options.route";
 import Debug from "./routes/common/debug.route";
+import Prospects from "./routes/prospects.route";
 const os = require("os");
 
 import UserRoute from "./routes/common/users.route";
@@ -28,6 +29,7 @@ if (cluster.isMaster) {
 } else {
   app.use(Debug);
   app.use(AuthRoute);
+  app.use(Prospects);
   app.use(authenticate, UserRoute);
   app.use(authenticate, OptionsRoute);
   app.use(authenticate, ConceptRoute);
