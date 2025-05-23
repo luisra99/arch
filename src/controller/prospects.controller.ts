@@ -163,12 +163,81 @@ export const markAsAttended = async (req: Request, res: Response) => {
   try {
     const updated = await prisma.prospects.update({
       where: { id },
-      data: { attended: new Date(Date.now()) },
+      data: { attended: new Date() },
     });
 
-    res.status(200).send("Prospecto marcado como atendido.");
+    res.status(200).send(`
+      <!DOCTYPE html>
+      <html lang="es">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>Prospecto marcado como atendido</title>
+          <style>
+            body {
+              background-color: #f9fafb;
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              height: 100vh;
+              margin: 0;
+            }
+            .container {
+              background: white;
+              padding: 32px;
+              border-radius: 12px;
+              box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+              text-align: center;
+              max-width: 480px;
+            }
+            .logo {
+              max-width: 120px;
+              margin-bottom: 24px;
+            }
+            h1 {
+              color: #111827;
+              font-size: 22px;
+              margin-bottom: 12px;
+            }
+            p {
+              color: #4b5563;
+              font-size: 16px;
+              margin: 8px 0;
+            }
+            .footer {
+              margin-top: 24px;
+              font-size: 13px;
+              color: #9ca3af;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <img src="https://dwellingplus.vercel.app/logo.png" alt="Dwellingplus Logo" class="logo" />
+            <h1>Prospecto marcado como atendido</h1>
+            <p><strong>Nombre:</strong> ${updated.name || "Sin nombre"}</p>
+            <p><strong>Correo:</strong> ${updated.email || "No registrado"}</p>
+            <p><strong>Teléfono:</strong> ${
+              updated.phone || "No registrado"
+            }</p>
+            <p><strong>Fecha de marcado:</strong> ${new Date(
+              updated.attended || new Date()
+            ).toLocaleString("es-ES")}</p>
+            <div class="footer">Dwellingplus · Administración de Prospectos</div>
+          </div>
+        </body>
+      </html>
+    `);
   } catch (err) {
     console.error(err);
-    res.status(500).send("Error al marcar como atendido.");
+    res.status(500).send(`
+      <html>
+        <body style="font-family: sans-serif; background-color: #fff0f0; padding: 40px;">
+          <h1 style="color: #a00;">Error al marcar como atendido</h1>
+          <p>Algo salió mal al actualizar este prospecto. Intenta de nuevo más tarde.</p>
+        </body>
+      </html>
+    `);
   }
 };
