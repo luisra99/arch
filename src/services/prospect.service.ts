@@ -125,16 +125,42 @@ export const sendConfirmationEmail = async ({
   subject: string;
   prospect: any;
 }) => {
+  const name = prospect.name || "";
+
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to,
     subject,
-    text: `Gracias por contactarnos ${
-      prospect.name || ""
-    }. Hemos recibido tu información y nos pondremos en contacto contigo pronto.`,
-    html: `<h1>Gracias por contactarnos ${
-      prospect.name || ""
-    }</h1><p>Hemos recibido tu información y nos pondremos en contacto contigo pronto.</p>`,
+    text: `Hola${name ? ` ${name}` : ""}, gracias por contactar a Dwellingplus.
+
+Hemos recibido tu información y muy pronto uno de nuestros especialistas se pondrá en contacto contigo.
+
+En Dwellingplus, nos especializamos en transformar ideas en espacios concretos. Nos encargamos de todo el proceso, facilitando que propietarios y desarrolladores cumplan su visión.
+
+Gracias por confiar en nosotros.`,
+    html: `
+      <div style="max-width: 600px; margin: auto; padding: 40px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9f9f9; border-radius: 12px; border: 1px solid #e0e0e0; color: #2c2c2c;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <img src="https://dwellingplus.vercel.app/assets/assets/logo.35029e2d1796423d6b79711f5ec47abf.svg" alt="Dwellingplus Logo" style="width: 150px; height: auto;" />
+        </div>
+        <h2 style="text-align: center; color: #1a1a1a;">Gracias por contactarnos${
+          name ? `, ${name}` : ""
+        }</h2>
+        <p style="font-size: 16px; line-height: 1.6; text-align: justify;">
+          Hemos recibido tu información y muy pronto uno de nuestros especialistas se comunicará contigo para brindarte la atención que mereces.
+        </p>
+        <p style="font-size: 16px; line-height: 1.6; text-align: justify;">
+          En <strong>Dwellingplus</strong>, acompañamos a propietarios y desarrolladores en el proceso completo de materializar sus proyectos inmobiliarios, con pasión, precisión y visión.
+        </p>
+        <blockquote style="margin: 30px 0; font-style: italic; color: #555; border-left: 4px solid #ccc; padding-left: 15px;">
+          “Tu espacio ideal no es un sueño lejano. Es un proyecto que empieza hoy.”
+        </blockquote>
+        <p style="font-size: 15px; text-align: center; color: #777;">Gracias por confiar en nosotros.</p>
+        <div style="text-align: center; margin-top: 40px;">
+          <a href="https://dwellingplus.com" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">Visitar nuestro sitio</a>
+        </div>
+      </div>
+    `,
   };
 
   await transporter.sendMail(mailOptions);
