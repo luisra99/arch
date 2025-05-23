@@ -156,3 +156,19 @@ export const deleteProspect = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const markAsAttended = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const updated = await prisma.prospects.update({
+      where: { id },
+      data: { attended: new Date(Date.now()) },
+    });
+
+    res.status(200).send("Prospecto marcado como atendido.");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error al marcar como atendido.");
+  }
+};
