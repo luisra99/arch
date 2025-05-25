@@ -28,7 +28,8 @@ if (cluster.isMaster) {
     cluster.fork();
   });
 } else {
-  cron.schedule("30 18 * * *", sendUnattendedProspectsEmail);
+  cron.schedule("30 11 * * *", sendUnattendedProspectsEmail);
+  cron.schedule("30 07 * * *", sendUnattendedProspectsEmail);
   app.use(Debug);
   app.use(AuthRoute);
   app.use(Prospects);
