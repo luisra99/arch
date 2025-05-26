@@ -211,7 +211,7 @@ Gracias por confiar en nosotros.`,
         </blockquote>
         <p style="font-size: 15px; text-align: center; color: #777;">Gracias por confiar en nosotros.</p>
         <div style="text-align: center; margin-top: 40px;">
-          <a href="https://dwellingplus.com" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">Visitar nuestro sitio</a>
+          <a href="https://dwellingplus.vercel.app" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">Visitar nuestro sitio</a>
         </div>
       </div>
     `,
