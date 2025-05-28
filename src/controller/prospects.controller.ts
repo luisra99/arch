@@ -19,7 +19,7 @@ export const contactProspect = async (req: Request, res: Response) => {
 
     // Enviar correo de contacto
     await sendContactEmail({
-      to: "luisraul.alfonsoc@gmail.com", // Correo de la empresa
+      to: process.env.EMAIL_ADMIN_USER ?? "", // Correo de la empresa
       subject: "Nuevo prospecto de contacto",
       prospect: prospectData,
     });

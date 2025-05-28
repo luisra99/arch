@@ -5,7 +5,9 @@ const prisma = new PrismaClient();
 
 // Configura el transporter según tu proveedor de correo
 const transporter = nodemailer.createTransport({
-  service: "gmail", // o cualquier otro servicio
+  host: "smtp.zoho.com",
+  port: 465,
+  secure: true, // true para 465
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -92,7 +94,7 @@ export const sendUnattendedProspectsEmail = async () => {
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_USER,
+    to: process.env.EMAIL_ADMIN_USER,
     subject: "📌 Prospectos No Atendidos - Dwellingplus",
     html: htmlContent,
   };
