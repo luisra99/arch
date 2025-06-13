@@ -3,6 +3,8 @@ import { PrismaClient } from "@prisma/client";
 import {
   sendContactEmail,
   sendConfirmationEmail,
+  sendQuestionToAdminEmail,
+  sendAnswerToProspectEmail,
 } from "../services/prospect.service"; // Asume que tienes un servicio de correo
 
 const prisma = new PrismaClient();
@@ -239,5 +241,93 @@ export const markAsAttended = async (req: Request, res: Response) => {
         </body>
       </html>
     `);
+  }
+};
+
+// POST /prospect/question
+export const questionFromProspect = async (req: Request, res: Response) => {
+  const { email, phone, question } = req.body;
+
+  if (!email || !question) {
+    return res.status(400).json({
+      error: "Email and question are required",
+    });
+  }
+
+  try {
+    // Buscar si el prospecto ya existe
+    let existing = await prisma.prospects.findFirst({
+      where: { email },
+    });
+
+    // Preparar mensaje para enviar al administrador
+
+    // Enviar correo al admin
+    sendQuestionToAdminEmail({
+      email,
+      question,
+      subject: "Nueva pregunta",
+      phone,
+      to: process.env.EMAIL_ADMIN_USER ?? "",
+    });
+
+    if (!existing) {
+      // Si no existe, lo creamos
+      const newProspect = await prisma.prospects.create({
+        data: {
+          email,
+          phone,
+          metadata: {
+            question: [question],
+          },
+        },
+      });
+
+      return res.status(201).json(newProspect);
+    } else {
+      // Si ya existe, actualizamos el metadata y attended
+      const previousMetadata: any = existing.metadata || {};
+      const previousQuestions = Array.isArray(previousMetadata.question)
+        ? previousMetadata.question
+        : previousMetadata.question
+        ? [previousMetadata.question]
+        : [];
+      const updatedProspect = await prisma.prospects.update({
+        where: { id: existing.id },
+        data: {
+          attended: null,
+          metadata: {
+            ...previousMetadata,
+            question: [...previousQuestions, question],
+          },
+        },
+      });
+
+      return res.status(200).json(updatedProspect);
+    }
+  } catch (error) {
+    console.error("Error in questionFromProspect:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+export const answerProspectQuestion = async (req: Request, res: Response) => {
+  try {
+    const { email, answer } = req.body;
+
+    if (!email || !answer) {
+      return res.status(400).json({ error: "Email and answer are required" });
+    }
+
+    // Enviar correo con la respuesta
+    await sendAnswerToProspectEmail({
+      to: email,
+      subject: "Respuesta a tu pregunta",
+      answer,
+    });
+
+    res.status(200).json({ message: "Respuesta enviada con éxito" });
+  } catch (error) {
+    console.error("Error en answerProspectQuestion:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

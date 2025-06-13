@@ -221,3 +221,143 @@ Gracias por confiar en nosotros.`,
 
   await transporter.sendMail(mailOptions);
 };
+
+export const sendQuestionConfirmationEmail = async ({
+  to,
+  subject,
+  prospect,
+  question,
+}: {
+  to: string;
+  subject: string;
+  prospect: any;
+  question: string;
+}) => {
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to,
+    subject,
+    text: `Hola hemos recibido tu pregunta:
+
+"${question}"
+
+Uno de nuestros especialistas se pondrá en contacto contigo muy pronto para brindarte la atención que mereces.
+
+Gracias por confiar en Dwellingplus.`,
+    html: `
+      <div style="max-width: 600px; margin: auto; padding: 40px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9f9f9; border-radius: 12px; border: 1px solid #e0e0e0; color: #2c2c2c;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <img src="https://dwellingplus.studio/logo.png" alt="Dwellingplus Logo" style="width: 150px; height: auto;" />
+        </div>
+        <h2 style="text-align: center; color: #1a1a1a;">Hemos recibido tu pregunta</h2>
+        <p style="font-size: 16px; line-height: 1.6; text-align: justify;">
+          Esta fue tu consulta:
+        </p>
+        <blockquote style="margin: 20px 0; padding-left: 15px; border-left: 4px solid #ccc; color: #555;">
+          ${question}
+        </blockquote>
+        <p style="font-size: 16px; line-height: 1.6; text-align: justify;">
+          Uno de nuestros especialistas se comunicará contigo en breve para brindarte una respuesta personalizada.
+        </p>
+        <p style="font-size: 16px; line-height: 1.6; text-align: justify;">
+          En <strong>Dwellingplus</strong>, transformamos ideas en espacios. Estamos comprometidos con hacer realidad tu proyecto.
+        </p>
+        <p style="font-size: 15px; text-align: center; color: #777;">Gracias por confiar en nosotros.</p>
+        <div style="text-align: center; margin-top: 40px;">
+          <a href="https://dwellingplus.studio" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">Visitar nuestro sitio</a>
+        </div>
+      </div>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+export const sendQuestionToAdminEmail = async ({
+  to,
+  subject,
+  email,
+  phone,
+  question,
+}: {
+  to: string;
+  subject: string;
+  email: string;
+  phone?: string;
+  question: string;
+}) => {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to,
+    subject,
+    text: `Nuevo mensaje de prospecto:
+
+Correo: ${email}
+${phone ? `Teléfono: ${phone}` : ""}
+Pregunta: ${question}
+`,
+    html: `
+      <div style="max-width: 600px; margin: auto; padding: 30px; font-family: Arial, sans-serif; background-color: #fefefe; border: 1px solid #ccc; border-radius: 8px;">
+        <h2 style="color: #222;">Nuevo mensaje de prospecto</h2>
+        <p><strong>Correo:</strong> ${email}</p>
+        ${
+          phone
+            ? `<p><strong>Teléfono:</strong> ${phone}</p>`
+            : "<p><em>No se proporcionó teléfono</em></p>"
+        }
+        <p><strong>Pregunta:</strong></p>
+        <blockquote style="margin: 20px 0; padding-left: 15px; border-left: 3px solid #aaa; color: #333;">
+          ${question}
+        </blockquote>
+        <p style="color: #777; font-size: 14px;">Este mensaje fue generado automáticamente por el sistema de contacto de Dwellingplus.</p>
+      </div>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+export const sendAnswerToProspectEmail = async ({
+  to,
+  subject,
+  answer,
+}: {
+  to: string;
+  subject: string;
+  answer: string;
+}) => {
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to,
+    subject,
+    text: `Hola, gracias por tu consulta.
+
+Aquí tienes nuestra respuesta:
+${answer}
+
+Estamos para ayudarte.
+
+El equipo de Dwellingplus.`,
+    html: `
+      <div style="max-width: 600px; margin: auto; padding: 40px; font-family: Arial, sans-serif; background-color: #f9f9f9; border-radius: 12px; border: 1px solid #e0e0e0; color: #2c2c2c;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <img src="https://dwellingplus.vercel.app/logo.png" alt="Dwellingplus Logo" style="width: 150px;" />
+        </div>
+        <h2 style="text-align: center; color: #1a1a1a;">Hola</h2>
+        <p style="font-size: 16px; line-height: 1.6;">Gracias por escribirnos. Aquí tienes la respuesta a tu consulta:</p>
+        <blockquote style="margin: 20px 0; padding-left: 15px; border-left: 3px solid #ccc; font-style: italic;">
+          ${answer}
+        </blockquote>
+        <p style="font-size: 15px;">Si tienes más dudas, no dudes en responder este correo. Estamos para ayudarte.</p>
+        <div style="text-align: center; margin-top: 30px;">
+          <a href="https://dwellingplus.vercel.app" style="background-color: #000; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">Visitar nuestro sitio</a>
+        </div>
+        <p style="text-align: center; font-size: 13px; color: #999; margin-top: 40px;">Dwellingplus · Atención al cliente</p>
+      </div>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
