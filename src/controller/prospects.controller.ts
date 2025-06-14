@@ -5,6 +5,7 @@ import {
   sendConfirmationEmail,
   sendQuestionToAdminEmail,
   sendAnswerToProspectEmail,
+  sendQuestionConfirmationEmail,
 } from "../services/prospect.service"; // Asume que tienes un servicio de correo
 
 const prisma = new PrismaClient();
@@ -86,7 +87,19 @@ export const getActiveProspects = async (req: Request, res: Response) => {
     const prospects = await prisma.prospects.findMany({
       where: { deleted: { equals: null } },
     });
-    res.status(200).json(prospects);
+
+    res.status(200).json(
+      prospects.map((item) => {
+        let status: string[] = [];
+        if (
+          (item?.metadata as any).question?.length >
+          (item?.metadata as any).answer?.length
+        )
+          status.push("ESPERANDO RESPUESTA");
+        if (!item?.attended) status.push("SIN ATENDER");
+        return { ...item, status };
+      })
+    );
   } catch (error) {
     console.error("Error in getAllProspects:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -148,8 +161,9 @@ export const deleteProspect = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    await prisma.prospects.delete({
+    await prisma.prospects.update({
       where: { id },
+      data: { deleted: new Date(Date.now()) },
     });
 
     res.status(204).send();
@@ -216,7 +230,7 @@ export const markAsAttended = async (req: Request, res: Response) => {
         </head>
         <body>
           <div class="container">
-            <img src="https://dwellingplus.vercel.app/logo.png" alt="Dwellingplus Logo" class="logo" />
+            <img src="https://dwellingplus.studio/logo.png" alt="Dwellingplus Logo" class="logo" />
             <h1>Prospecto marcado como atendido</h1>
             <p><strong>Nombre:</strong> ${updated.name || "Sin nombre"}</p>
             <p><strong>Correo:</strong> ${updated.email || "No registrado"}</p>
@@ -246,7 +260,11 @@ export const markAsAttended = async (req: Request, res: Response) => {
 
 // POST /prospect/question
 export const questionFromProspect = async (req: Request, res: Response) => {
-  const { email, phone, question } = req.body;
+  const {
+    email,
+    phone,
+    metadata: { question },
+  } = req.body;
 
   if (!email || !question) {
     return res.status(400).json({
@@ -270,6 +288,12 @@ export const questionFromProspect = async (req: Request, res: Response) => {
       phone,
       to: process.env.EMAIL_ADMIN_USER ?? "",
     });
+    if (email)
+      sendQuestionConfirmationEmail({
+        to: email,
+        subject: "Confirmation",
+        question,
+      });
 
     if (!existing) {
       // Si no existe, lo creamos
@@ -310,6 +334,7 @@ export const questionFromProspect = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 export const answerProspectQuestion = async (req: Request, res: Response) => {
   try {
     const { email, answer } = req.body;
@@ -317,13 +342,46 @@ export const answerProspectQuestion = async (req: Request, res: Response) => {
     if (!email || !answer) {
       return res.status(400).json({ error: "Email and answer are required" });
     }
-
     // Enviar correo con la respuesta
     await sendAnswerToProspectEmail({
       to: email,
-      subject: "Respuesta a tu pregunta",
+      subject: "About your question",
       answer,
     });
+
+    let existing = await prisma.prospects.findFirst({
+      where: { email },
+    });
+
+    if (!existing) {
+      // Si no existe, lo creamos
+      const newProspect = await prisma.prospects.create({
+        data: {
+          email,
+          metadata: {
+            answer: [answer],
+          },
+        },
+      });
+    } else {
+      // Si ya existe, actualizamos el metadata y attended
+      const previousMetadata: any = existing.metadata || {};
+      const previousAnswers = Array.isArray(previousMetadata.answer)
+        ? previousMetadata.answer
+        : previousMetadata.answer
+        ? [previousMetadata.answer]
+        : [];
+      const updatedProspect = await prisma.prospects.update({
+        where: { id: existing.id },
+        data: {
+          attended: null,
+          metadata: {
+            ...previousMetadata,
+            answer: [...previousAnswers, answer],
+          },
+        },
+      });
+    }
 
     res.status(200).json({ message: "Respuesta enviada con éxito" });
   } catch (error) {

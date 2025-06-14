@@ -197,7 +197,7 @@ Gracias por confiar en nosotros.`,
     html: `
       <div style="max-width: 600px; margin: auto; padding: 40px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9f9f9; border-radius: 12px; border: 1px solid #e0e0e0; color: #2c2c2c;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <img src="https://dwellingplus.vercel.app/logo.png" alt="Dwellingplus Logo" style="width: 150px; height: auto;" />
+          <img src="https://dwellingplus.studio/logo.png" alt="Dwellingplus Logo" style="width: 150px; height: auto;" />
         </div>
         <h2 style="text-align: center; color: #1a1a1a;">Gracias por contactarnos${
           name ? `, ${name}` : ""
@@ -213,7 +213,7 @@ Gracias por confiar en nosotros.`,
         </blockquote>
         <p style="font-size: 15px; text-align: center; color: #777;">Gracias por confiar en nosotros.</p>
         <div style="text-align: center; margin-top: 40px;">
-          <a href="https://dwellingplus.vercel.app" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">Visitar nuestro sitio</a>
+          <a href="https://dwellingplus.studio" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">Visitar nuestro sitio</a>
         </div>
       </div>
     `,
@@ -230,10 +230,9 @@ export const sendQuestionConfirmationEmail = async ({
 }: {
   to: string;
   subject: string;
-  prospect: any;
+  prospect?: any;
   question: string;
 }) => {
-
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to,
@@ -327,7 +326,6 @@ export const sendAnswerToProspectEmail = async ({
   subject: string;
   answer: string;
 }) => {
-
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to,
@@ -343,7 +341,7 @@ El equipo de Dwellingplus.`,
     html: `
       <div style="max-width: 600px; margin: auto; padding: 40px; font-family: Arial, sans-serif; background-color: #f9f9f9; border-radius: 12px; border: 1px solid #e0e0e0; color: #2c2c2c;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <img src="https://dwellingplus.vercel.app/logo.png" alt="Dwellingplus Logo" style="width: 150px;" />
+          <img src="https://dwellingplus.studio/logo.png" alt="Dwellingplus Logo" style="width: 150px;" />
         </div>
         <h2 style="text-align: center; color: #1a1a1a;">Hola</h2>
         <p style="font-size: 16px; line-height: 1.6;">Gracias por escribirnos. Aquí tienes la respuesta a tu consulta:</p>
@@ -352,7 +350,7 @@ El equipo de Dwellingplus.`,
         </blockquote>
         <p style="font-size: 15px;">Si tienes más dudas, no dudes en responder este correo. Estamos para ayudarte.</p>
         <div style="text-align: center; margin-top: 30px;">
-          <a href="https://dwellingplus.vercel.app" style="background-color: #000; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">Visitar nuestro sitio</a>
+          <a href="https://dwellingplus.studio" style="background-color: #000; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">Visitar nuestro sitio</a>
         </div>
         <p style="text-align: center; font-size: 13px; color: #999; margin-top: 40px;">Dwellingplus · Atención al cliente</p>
       </div>
