@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { createUser, findUserByUsername, validatePassword } from "../models/User";
-import { generateToken } from "../helpers/jwt";
+import { generateToken, parseJwt } from "../helpers/jwt";
 import { logger } from "../../utils/logger";
+import axios from "axios";
 
 
 export const register = async (req: Request, res: Response) => {
@@ -54,4 +55,33 @@ export const login = async (req: Request, res: Response) => {
 export const logout = (req: Request, res: Response) => {
     res.clearCookie("auth_token");
     res.status(200).json({ message: "Logged out successfully" });
+};
+export const signInWithGoogle = async (req: Request, res: Response) => {
+    const { code } = req.query;
+    try {
+        const { data } = await axios.post('https://oauth2.googleapis.com/token', {
+            code: code?.toString() || "",
+            client_id: process.env.CLIENT_ID || "",
+            client_secret: process.env.CLIENT_SECRET || "",
+            redirect_uri: process.env.REDIRECT_URL || "",
+            grant_type: 'authorization_code',
+        }, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        });
+
+
+        console.log(data)
+        const idToken = data.id_token;
+
+        const userInfo = parseJwt(idToken);
+        console.log('User Info:', userInfo);
+         const token = generateToken({ id: userInfo.sub, username: userInfo.email });
+        res.cookie("token", token)
+        res.status(200).json(userInfo);
+    } catch (error) {
+        console.log(error)
+        res.status(500).json(error);
+    }
 };
