@@ -20,7 +20,7 @@ export const sendUnattendedProspectsEmail = async () => {
   });
 
   if (prospects.length === 0) {
-    console.log("No hay prospectos pendientes.");
+    console.log("No unattended prospects.");
     return;
   }
 
@@ -29,7 +29,6 @@ export const sendUnattendedProspectsEmail = async () => {
 
   for (const p of prospects) {
     const isIncomplete = !p.name && !p.lastName && !p.email && !p.phone;
-
     if (isIncomplete) {
       incompleteCount++;
     } else {
@@ -38,47 +37,69 @@ export const sendUnattendedProspectsEmail = async () => {
   }
 
   const tableRows = completeProspects
-    .map(
-      (p) => `
+    .map((p) => {
+      // Only show phone buttons if phone exists
+      const phoneButtons = p.phone
+        ? `
+          <td style="text-align: center;">
+            <a href="tel:${p.phone}" style="display: inline-block; padding: 6px 10px; background: #4caf50; color: #fff; text-decoration: none; border-radius: 4px;">Call</a>
+          </td>
+          <td style="text-align: center;">
+            <a href="sms:${p.phone}" style="display: inline-block; padding: 6px 10px; background: #2196f3; color: #fff; text-decoration: none; border-radius: 4px;">SMS</a>
+          </td>
+          <td style="text-align: center;">
+            <a href="https://wa.me/${p.phone.replace(/[^0-9]/g, '')}" style="display: inline-block; padding: 6px 10px; background: #25d366; color: #fff; text-decoration: none; border-radius: 4px;">WhatsApp</a>
+          </td>
+        `
+        : `
+          <td style="text-align: center; color: #aaa;">-</td>
+          <td style="text-align: center; color: #aaa;">-</td>
+          <td style="text-align: center; color: #aaa;">-</td>
+        `;
+
+      return `
         <tr>
           <td>${p.name || "-"}</td>
           <td>${p.lastName || "-"}</td>
           <td>${p.email || "-"}</td>
           <td>${p.phone || "-"}</td>
-          <td>
-            <form action="${process.env.SERVER_URL}/prospect/${
-        p.id
-      }/atender" method="POST">
+          ${phoneButtons}
+          <td style="text-align: center;">
+            <form action="${process.env.SERVER_URL}/prospect/${p.id}/atender" method="POST">
               <button type="submit" style="padding: 6px 12px; background-color: #007bff; color: white; border: none; border-radius: 4px;">
-                Marcar como atendido
+                Mark as Attended
               </button>
             </form>
           </td>
-        </tr>`
-    )
+        </tr>
+      `;
+    })
     .join("");
 
   const incompleteRow = incompleteCount
     ? `
       <tr>
-        <td colspan="5" style="background-color: #fff3cd; color: #856404; text-align: center;">
-          ${incompleteCount} prospecto(s) sin información básica (omitidos)
+        <td colspan="8" style="background-color: #fff3cd; color: #856404; text-align: center;">
+          ${incompleteCount} prospect(s) without basic information (omitted)
         </td>
       </tr>`
     : "";
 
   const htmlContent = `
     <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; padding: 20px;">
-      <h2 style="color: #2c3e50;">📋 Lista de Prospectos No Atendidos</h2>
-      <p style="margin-bottom: 20px;">A continuación se muestra un resumen de los prospectos que aún no han sido atendidos.</p>
+      <h2 style="color: #2c3e50;">📋 Unattended Prospects List</h2>
+      <p style="margin-bottom: 20px;">Below is a summary of prospects that have not yet been attended to.</p>
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
         <thead>
           <tr style="background-color: #f2f2f2;">
-            <th style="padding: 10px; border: 1px solid #ddd;">Nombre</th>
-            <th style="padding: 10px; border: 1px solid #ddd;">Apellido</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">First Name</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">Last Name</th>
             <th style="padding: 10px; border: 1px solid #ddd;">Email</th>
-            <th style="padding: 10px; border: 1px solid #ddd;">Teléfono</th>
-            <th style="padding: 10px; border: 1px solid #ddd;">Acción</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">Phone</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">Call</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">SMS</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">WhatsApp</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -87,7 +108,7 @@ export const sendUnattendedProspectsEmail = async () => {
         </tbody>
       </table>
       <footer style="font-size: 12px; color: #999; text-align: center;">
-        Enviado automáticamente por Dwellingplus | ${new Date().toLocaleDateString()}
+        Automatically sent by Dwellingplus | ${new Date().toLocaleDateString()}
       </footer>
     </div>
   `;
@@ -95,12 +116,12 @@ export const sendUnattendedProspectsEmail = async () => {
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: process.env.EMAIL_ADMIN_USER,
-    subject: "📌 Prospectos No Atendidos - Dwellingplus",
+    subject: "📌 Unattended Prospects - Dwellingplus",
     html: htmlContent,
   };
 
   await transporter.sendMail(mailOptions);
-  console.log("Correo de prospectos no atendidos enviado.");
+  console.log("Unattended prospects email sent.");
 };
 
 export const sendContactEmail = async ({
@@ -123,48 +144,61 @@ export const sendContactEmail = async ({
   };
 }) => {
   const {
-    name = "No especificado",
-    lastName = "No especificado",
-    address = "No especificada",
-    email: prospectEmail = "No especificado",
-    phone = "No especificado",
-    state = "No especificado",
-    city = "No especificada",
-    postal = "No especificado",
+    name = "Not specified",
+    lastName = "Not specified",
+    address = "Not specified",
+    email: prospectEmail = "Not specified",
+    phone = "Not specified",
+    state = "Not specified",
+    city = "Not specified",
+    postal = "Not specified",
   } = prospect;
+
+  // Phone action buttons if phone is provided and not the default "Not specified"
+  const phoneButtons =
+    phone && phone !== "Not specified"
+      ? `
+        <div style="margin: 15px 0;">
+          <a href="tel:${phone}" style="display: inline-block; margin-right: 10px; padding: 8px 14px; background: #4caf50; color: #fff; text-decoration: none; border-radius: 4px;">Call</a>
+          <a href="sms:${phone}" style="display: inline-block; margin-right: 10px; padding: 8px 14px; background: #2196f3; color: #fff; text-decoration: none; border-radius: 4px;">Send SMS</a>
+          <a href="https://wa.me/${phone.replace(/[^0-9]/g, '')}" style="display: inline-block; padding: 8px 14px; background: #25d366; color: #fff; text-decoration: none; border-radius: 4px;">WhatsApp</a>
+        </div>
+      `
+      : "";
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to,
     subject,
-    text: `Nuevo prospecto de contacto:
+    text: `New contact prospect:
 
-Nombre: ${name} ${lastName}
+Name: ${name} ${lastName}
 Email: ${prospectEmail}
-Teléfono: ${phone}
-Dirección: ${address}
-Ciudad: ${city}
-Estado: ${state}
-Código Postal: ${postal}
-Mensaje: ${prospect.metadata?.message || "No especificado"}
+Phone: ${phone}
+Address: ${address}
+City: ${city}
+State: ${state}
+Postal Code: ${postal}
+Message: ${prospect.metadata?.message || "Not specified"}
 `,
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #333;">
-        <h2 style="color: #222;">📬 Nuevo Prospecto de Contacto</h2>
+        <h2 style="color: #222;">📬 New Contact Prospect</h2>
         <table style="border-collapse: collapse; width: 100%; margin-top: 20px;">
           <tbody>
-            <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Nombre</td><td style="padding: 8px; border: 1px solid #ddd;">${name} ${lastName}</td></tr>
+            <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Name</td><td style="padding: 8px; border: 1px solid #ddd;">${name} ${lastName}</td></tr>
             <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Email</td><td style="padding: 8px; border: 1px solid #ddd;">${prospectEmail}</td></tr>
-            <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Teléfono</td><td style="padding: 8px; border: 1px solid #ddd;">${phone}</td></tr>
-            <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Dirección</td><td style="padding: 8px; border: 1px solid #ddd;">${address}</td></tr>
-            <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Ciudad</td><td style="padding: 8px; border: 1px solid #ddd;">${city}</td></tr>
-            <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Estado</td><td style="padding: 8px; border: 1px solid #ddd;">${state}</td></tr>
-            <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Código Postal</td><td style="padding: 8px; border: 1px solid #ddd;">${postal}</td></tr>
-            <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Mensaje</td><td style="padding: 8px; border: 1px solid #ddd;">${
-              prospect.metadata?.message || "No especificado"
+            <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Phone</td><td style="padding: 8px; border: 1px solid #ddd;">${phone}${phoneButtons}</td></tr>
+            <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Address</td><td style="padding: 8px; border: 1px solid #ddd;">${address}</td></tr>
+            <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">City</td><td style="padding: 8px; border: 1px solid #ddd;">${city}</td></tr>
+            <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">State</td><td style="padding: 8px; border: 1px solid #ddd;">${state}</td></tr>
+            <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Postal Code</td><td style="padding: 8px; border: 1px solid #ddd;">${postal}</td></tr>
+            <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Message</td><td style="padding: 8px; border: 1px solid #ddd;">${
+              prospect.metadata?.message || "Not specified"
             }</td></tr>
           </tbody>
         </table>
+        <p style="color: #777; font-size: 14px; margin-top: 20px;">This message was automatically generated by the Dwellingplus contact system.</p>
       </div>
     `,
   };
@@ -187,33 +221,31 @@ export const sendConfirmationEmail = async ({
     from: process.env.EMAIL_USER,
     to,
     subject,
-    text: `Hola${name ? ` ${name}` : ""}, gracias por contactar a Dwellingplus.
+    text: `Hello${name ? ` ${name}` : ""}, thank you for contacting Dwellingplus.
 
-Hemos recibido tu información y muy pronto uno de nuestros especialistas se pondrá en contacto contigo.
+We have received your information and one of our specialists will contact you very soon.
 
-En Dwellingplus, nos especializamos en transformar ideas en espacios concretos. Nos encargamos de todo el proceso, facilitando que propietarios y desarrolladores cumplan su visión.
+At Dwellingplus, we specialize in turning ideas into real spaces. We handle the entire process, making it easier for property owners and developers to fulfill their vision.
 
-Gracias por confiar en nosotros.`,
+Thank you for trusting us.`,
     html: `
       <div style="max-width: 600px; margin: auto; padding: 40px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9f9f9; border-radius: 12px; border: 1px solid #e0e0e0; color: #2c2c2c;">
         <div style="text-align: center; margin-bottom: 30px;">
           <img src="https://dwellingplus.studio/logo.png" alt="Dwellingplus Logo" style="width: 150px; height: auto;" />
         </div>
-        <h2 style="text-align: center; color: #1a1a1a;">Gracias por contactarnos${
-          name ? `, ${name}` : ""
-        }</h2>
+        <h2 style="text-align: center; color: #1a1a1a;">Thank you for contacting us${name ? `, ${name}` : ""}</h2>
         <p style="font-size: 16px; line-height: 1.6; text-align: justify;">
-          Hemos recibido tu información y muy pronto uno de nuestros especialistas se comunicará contigo para brindarte la atención que mereces.
+          We have received your information and one of our specialists will reach out to you soon to provide the attention you deserve.
         </p>
         <p style="font-size: 16px; line-height: 1.6; text-align: justify;">
-          En <strong>Dwellingplus</strong>, acompañamos a propietarios y desarrolladores en el proceso completo de materializar sus proyectos inmobiliarios, con pasión, precisión y visión.
+          At <strong>Dwellingplus</strong>, we guide property owners and developers through the entire process of bringing their real estate projects to life—with passion, precision, and vision.
         </p>
         <blockquote style="margin: 30px 0; font-style: italic; color: #555; border-left: 4px solid #ccc; padding-left: 15px;">
-          “Tu espacio ideal no es un sueño lejano. Es un proyecto que empieza hoy.”
+          “Your ideal space is not a distant dream. It's a project that starts today.”
         </blockquote>
-        <p style="font-size: 15px; text-align: center; color: #777;">Gracias por confiar en nosotros.</p>
+        <p style="font-size: 15px; text-align: center; color: #777;">Thank you for trusting us.</p>
         <div style="text-align: center; margin-top: 40px;">
-          <a href="https://dwellingplus.studio" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">Visitar nuestro sitio</a>
+          <a href="https://dwellingplus.studio" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">Visit our website</a>
         </div>
       </div>
     `,
@@ -221,6 +253,7 @@ Gracias por confiar en nosotros.`,
 
   await transporter.sendMail(mailOptions);
 };
+
 
 export const sendQuestionConfirmationEmail = async ({
   to,
@@ -237,34 +270,34 @@ export const sendQuestionConfirmationEmail = async ({
     from: process.env.EMAIL_USER,
     to,
     subject,
-    text: `Hola hemos recibido tu pregunta:
+    text: `Hello, we have received your question:
 
 "${question}"
 
-Uno de nuestros especialistas se pondrá en contacto contigo muy pronto para brindarte la atención que mereces.
+One of our specialists will contact you very soon to provide the attention you deserve.
 
-Gracias por confiar en Dwellingplus.`,
+Thank you for trusting Dwellingplus.`,
     html: `
       <div style="max-width: 600px; margin: auto; padding: 40px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9f9f9; border-radius: 12px; border: 1px solid #e0e0e0; color: #2c2c2c;">
         <div style="text-align: center; margin-bottom: 30px;">
           <img src="https://dwellingplus.studio/logo.png" alt="Dwellingplus Logo" style="width: 150px; height: auto;" />
         </div>
-        <h2 style="text-align: center; color: #1a1a1a;">Hemos recibido tu pregunta</h2>
+        <h2 style="text-align: center; color: #1a1a1a;">We have received your question</h2>
         <p style="font-size: 16px; line-height: 1.6; text-align: justify;">
-          Esta fue tu consulta:
+          Here is your inquiry:
         </p>
         <blockquote style="margin: 20px 0; padding-left: 15px; border-left: 4px solid #ccc; color: #555;">
           ${question}
         </blockquote>
         <p style="font-size: 16px; line-height: 1.6; text-align: justify;">
-          Uno de nuestros especialistas se comunicará contigo en breve para brindarte una respuesta personalizada.
+          One of our specialists will contact you shortly to provide a personalized response.
         </p>
         <p style="font-size: 16px; line-height: 1.6; text-align: justify;">
-          En <strong>Dwellingplus</strong>, transformamos ideas en espacios. Estamos comprometidos con hacer realidad tu proyecto.
+          At <strong>Dwellingplus</strong>, we transform ideas into spaces. We are committed to making your project a reality.
         </p>
-        <p style="font-size: 15px; text-align: center; color: #777;">Gracias por confiar en nosotros.</p>
+        <p style="font-size: 15px; text-align: center; color: #777;">Thank you for trusting us.</p>
         <div style="text-align: center; margin-top: 40px;">
-          <a href="https://dwellingplus.studio" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">Visitar nuestro sitio</a>
+          <a href="https://dwellingplus.studio" target="_blank" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold;">Visit our website</a>
         </div>
       </div>
     `,
@@ -272,6 +305,7 @@ Gracias por confiar en Dwellingplus.`,
 
   await transporter.sendMail(mailOptions);
 };
+
 
 export const sendQuestionToAdminEmail = async ({
   to,
@@ -286,36 +320,52 @@ export const sendQuestionToAdminEmail = async ({
   phone?: string;
   question: string;
 }) => {
+  // Helper to generate phone action buttons if phone is provided
+  const phoneButtons = phone
+    ? `
+      <div style="margin: 15px 0;">
+        <a href="tel:${phone}" style="display: inline-block; margin-right: 10px; padding: 8px 14px; background: #4caf50; color: #fff; text-decoration: none; border-radius: 4px;">Call</a>
+        <a href="sms:${phone}" style="display: inline-block; margin-right: 10px; padding: 8px 14px; background: #2196f3; color: #fff; text-decoration: none; border-radius: 4px;">Send SMS</a>
+        <a href="https://wa.me/${phone.replace(/[^0-9]/g, '')}" style="display: inline-block; padding: 8px 14px; background: #25d366; color: #fff; text-decoration: none; border-radius: 4px;">WhatsApp</a>
+      </div>
+    `
+    : "";
+
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to,
     subject,
-    text: `Nuevo mensaje de prospecto:
+    text: `New prospect message:
 
-Correo: ${email}
-${phone ? `Teléfono: ${phone}` : ""}
-Pregunta: ${question}
+Email: ${email ?? ""}
+${phone ? `Phone: ${phone}` : ""}
+Question: ${question}
 `,
     html: `
       <div style="max-width: 600px; margin: auto; padding: 30px; font-family: Arial, sans-serif; background-color: #fefefe; border: 1px solid #ccc; border-radius: 8px;">
-        <h2 style="color: #222;">Nuevo mensaje de prospecto</h2>
-        <p><strong>Correo:</strong> ${email}</p>
+        <h2 style="color: #222;">New Prospect Message</h2>
+        ${
+          email
+            ? `<p><strong>Email:</strong> ${email}</p>`
+            : "<p><em>No email provided</em></p>"
+        }
         ${
           phone
-            ? `<p><strong>Teléfono:</strong> ${phone}</p>`
-            : "<p><em>No se proporcionó teléfono</em></p>"
+            ? `<p><strong>Phone:</strong> ${phone}</p>${phoneButtons}`
+            : "<p><em>No phone provided</em></p>"
         }
-        <p><strong>Pregunta:</strong></p>
+        <p><strong>Question:</strong></p>
         <blockquote style="margin: 20px 0; padding-left: 15px; border-left: 3px solid #aaa; color: #333;">
           ${question}
         </blockquote>
-        <p style="color: #777; font-size: 14px;">Este mensaje fue generado automáticamente por el sistema de contacto de Dwellingplus.</p>
+        <p style="color: #777; font-size: 14px;">This message was automatically generated by the Dwellingplus contact system.</p>
       </div>
     `,
   };
 
   await transporter.sendMail(mailOptions);
 };
+
 
 export const sendAnswerToProspectEmail = async ({
   to,
@@ -330,32 +380,33 @@ export const sendAnswerToProspectEmail = async ({
     from: process.env.EMAIL_USER,
     to,
     subject,
-    text: `Hola, gracias por tu consulta.
+    text: `Hello, thank you for your inquiry.
 
-Aquí tienes nuestra respuesta:
+Here is our response:
 ${answer}
 
-Estamos para ayudarte.
+We are here to help you.
 
-El equipo de Dwellingplus.`,
+The Dwellingplus Team.`,
     html: `
       <div style="max-width: 600px; margin: auto; padding: 40px; font-family: Arial, sans-serif; background-color: #f9f9f9; border-radius: 12px; border: 1px solid #e0e0e0; color: #2c2c2c;">
         <div style="text-align: center; margin-bottom: 30px;">
           <img src="https://dwellingplus.studio/logo.png" alt="Dwellingplus Logo" style="width: 150px;" />
         </div>
-        <h2 style="text-align: center; color: #1a1a1a;">Hola</h2>
-        <p style="font-size: 16px; line-height: 1.6;">Gracias por escribirnos. Aquí tienes la respuesta a tu consulta:</p>
+        <h2 style="text-align: center; color: #1a1a1a;">Hello</h2>
+        <p style="font-size: 16px; line-height: 1.6;">Thank you for reaching out to us. Here is the answer to your inquiry:</p>
         <blockquote style="margin: 20px 0; padding-left: 15px; border-left: 3px solid #ccc; font-style: italic;">
           ${answer}
         </blockquote>
-        <p style="font-size: 15px;">Si tienes más dudas, no dudes en responder este correo. Estamos para ayudarte.</p>
+        <p style="font-size: 15px;">If you have any further questions, feel free to reply to this email. We are here to help you.</p>
         <div style="text-align: center; margin-top: 30px;">
-          <a href="https://dwellingplus.studio" style="background-color: #000; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">Visitar nuestro sitio</a>
+          <a href="https://dwellingplus.studio" style="background-color: #000; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">Visit our website</a>
         </div>
-        <p style="text-align: center; font-size: 13px; color: #999; margin-top: 40px;">Dwellingplus · Atención al cliente</p>
+        <p style="text-align: center; font-size: 13px; color: #999; margin-top: 40px;">Dwellingplus · Customer Service</p>
       </div>
     `,
   };
 
   await transporter.sendMail(mailOptions);
 };
+
