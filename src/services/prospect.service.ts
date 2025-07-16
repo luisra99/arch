@@ -160,7 +160,6 @@ export const sendContactEmail = async ({
       ? `
         <div style="margin: 15px 0;">
           <a href="tel:${phone}" style="display: inline-block; margin-right: 10px; padding: 8px 14px; background: #4caf50; color: #fff; text-decoration: none; border-radius: 4px;">Call</a>
-          <a href="sms:${phone}" style="display: inline-block; margin-right: 10px; padding: 8px 14px; background: #2196f3; color: #fff; text-decoration: none; border-radius: 4px;">Send SMS</a>
           <a href="https://wa.me/${phone.replace(/[^0-9]/g, '')}" style="display: inline-block; padding: 8px 14px; background: #25d366; color: #fff; text-decoration: none; border-radius: 4px;">WhatsApp</a>
         </div>
       `

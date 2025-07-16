@@ -70,3 +70,19 @@ model Metadata {
   filed   String
   deleted DateTime?
 }
+model ShareToken {
+  id         String   @id @default(uuid())
+  type       ShareType
+  path       String           // archivo o carpeta
+  email      String
+  token      String   @unique
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+
+  @@index([token])
+}
+
+enum ShareType {
+  FILE
+  FOLDER
+}

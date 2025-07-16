@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { createUser, findUserByUsername, validatePassword } from "../models/User";
-import { generateToken, parseJwt } from "../helpers/jwt";
+import { generateToken, parseJwt, verifyToken } from "../helpers/jwt";
 import { logger } from "../../utils/logger";
 import axios from "axios";
 
@@ -75,11 +75,27 @@ export const signInWithGoogle = async (req: Request, res: Response) => {
         console.log(data)
         const idToken = data.id_token;
 
-        const userInfo = parseJwt(idToken);
+        let userInfo = parseJwt(idToken);
         console.log('User Info:', userInfo);
-         const token = generateToken({ id: userInfo.sub, username: userInfo.email });
+        const token = generateToken({ id: userInfo.sub, email: userInfo.email, name: userInfo.name, picture: userInfo.picture });
+        userInfo.token = token
         res.cookie("token", token)
         res.status(200).json(userInfo);
+    } catch (error) {
+        console.log(error)
+        getUserInfo(req, res)
+    }
+};
+
+export const getUserInfo = async (req: Request, res: Response) => {
+    try {
+        const { token: _oldTokenCookie } = req.cookies;
+        const { token: _oldTokenBody } = req.body;
+        console.log({ _oldTokenCookie, _oldTokenBody })
+        let { payload, newToken } = verifyToken(typeof (_oldTokenCookie ?? _oldTokenBody) == "string" ? _oldTokenCookie ?? _oldTokenBody : (_oldTokenCookie ?? _oldTokenBody).value)
+        payload.token = newToken
+        res.cookie("token", payload)
+        return res.status(200).json(payload);
     } catch (error) {
         console.log(error)
         res.status(500).json(error);
