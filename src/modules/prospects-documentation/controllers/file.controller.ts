@@ -57,7 +57,7 @@ export const renameFileController = async (req: Request, res: Response) => {
 };
 
 export const getTreeController = async (req: Request, res: Response) => {
-  const prospectId = req.params.prospectId;
+  const prospectId = req?.params?.prospectId??"";
   const flatPaths = await listFilesRecursively(prospectId);
   res.json(flatPaths);
 };

@@ -13,6 +13,7 @@ const router = Router();
 const upload = multer({ dest: "tmp/" });
 
 router.get("/files/tree/:prospectId", getTreeController);
+router.get("/files/tree", getTreeController);
 router.get("/files/zip", downloadZipController);
 router.post("/files/share", shareFolderController);
 
