@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { prismaInstance } from "prisma/client";
+import { prismaInstance } from "../../../../prisma/client";
 import { createProspectService, getActiveProspectsService, getAllProspectsService } from "../services/manage.prospect.service";
 
 export const createProspectController = async (req: Request, res: Response) => {

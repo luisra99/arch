@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../helpers/jwt";
-import logger from "@/libs/logger";
+import logger from "../../libs/logger";
 
 export const authenticate = (
   req: Request,

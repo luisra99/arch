@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import { createUser, findUserByUsername, validatePassword } from "../models/User";
 import { generateToken, parseJwt, verifyToken } from "../helpers/jwt";
 import axios from "axios";
-import logger from "@/libs/logger";
-import { env } from "@config/env";
+import logger from "../../libs/logger";
+import { env } from "../../config/env";
 
 
 export const register = async (req: Request, res: Response) => {

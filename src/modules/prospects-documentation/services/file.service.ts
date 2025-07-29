@@ -5,9 +5,9 @@ import { AppError } from "../../../types/errors";
 import archiver from "archiver";
 import { Buffer } from "buffer";
 import { getFileTypeFromExtension, sanitizeFilename } from "../../../utils/file.utils";
-import { prismaInstance } from "prisma/client";
+import { prismaInstance } from "../../../../prisma/client";
 import { getMimeType } from "../utils/file.utils";
-import { env } from "@/config/env";
+import { env } from "../../../config/env";
 
 type TreeNode = {
   name: string;

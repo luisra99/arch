@@ -1,4 +1,4 @@
-import { prismaInstance } from "prisma/client";
+import { prismaInstance } from "../../../../prisma/client";
 
 export const getConceptByDenominationService = async (denomination: string, prisma = prismaInstance) => {
   try {

@@ -1,4 +1,4 @@
-import logger from "@/libs/logger";
+import logger from "../../libs/logger";
 import jwt from "jsonwebtoken";
 
 const SECRET_KEY = "your_secret_key"; // Cambia esto a algo más seguro

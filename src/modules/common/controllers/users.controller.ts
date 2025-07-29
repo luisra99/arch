@@ -12,8 +12,8 @@ export const listUsersController = async (req: Request, res: Response) => {
     });
     res.status(200).json(users);
   } catch (error) {
-   
-    res.status(500).json(descriptionError);
+
+    res.status(500).json(error);
   }
 };
 
@@ -26,8 +26,8 @@ export const deleteUserController = async (req: Request, res: Response) => {
     });
     res.status(200).json(users);
   } catch (error) {
-    
-    res.status(500).json(descriptionError);
+
+    res.status(500).json(error);
   }
 };
 
@@ -41,7 +41,7 @@ export const updateUserController = async (req: Request, res: Response) => {
     });
     res.status(200).json(users);
   } catch (error) {
-    
-    res.status(500).json(descriptionError);
+
+    res.status(500).json(error);
   }
 };

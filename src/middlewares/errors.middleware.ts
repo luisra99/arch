@@ -1,6 +1,6 @@
-import logger from "@/libs/logger";
+import logger from "../libs/logger";
 import { Request, Response } from "express"
-import { env } from "@/config/env"
+import { env } from "../config/env"
 
 
 export function errorLogger(err: Error, req: Request, res: Response,) {

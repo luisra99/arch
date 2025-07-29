@@ -1,5 +1,5 @@
-import { answerProspectQuestionController, contactProspectController,  questionFromProspectController } from "@/modules/prospects/controllers/mailing.prospect.controller";
-import { sendUnattendedProspectsEmailService } from "@/modules/prospects/services/mailing.prospect.service";
+import { answerProspectQuestionController, contactProspectController,  questionFromProspectController } from "../../modules/prospects/controllers/mailing.prospect.controller";
+import { sendUnattendedProspectsEmailService } from "../../modules/prospects/services/mailing.prospect.service";
 import { Router } from "express";
 import { createProspectController, getActiveProspects, getProspectById, updateProspect, deleteProspect, markAsAttended } from "./controllers/manage.prospect.controller";
 

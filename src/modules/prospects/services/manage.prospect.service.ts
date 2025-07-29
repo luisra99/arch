@@ -1,4 +1,4 @@
-import { prismaInstance } from "prisma/client";
+import { prismaInstance } from "../../../../prisma/client";
 
 export const createProspectService = async (prospectData: any,prisma=prismaInstance) => {
     const newProspect = await prisma.prospects.create({

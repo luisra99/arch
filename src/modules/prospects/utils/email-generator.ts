@@ -1,3 +1,5 @@
+import { env } from "../../../config/env";
+
 export const createUnattendedProspectsEmail = ({ completeProspects, incompleteCount }: any) => {
     const tableRows = completeProspects
         .map((p: any) => {

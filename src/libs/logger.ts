@@ -17,7 +17,7 @@ const logger = pino(
         },
         {
           target: 'pino/file', // Para archivo
-          options: { destination: '../logs/errors.log' },
+          options: { destination: './logs/errors.log' },
           level: 'error', // Solo errores van a este archivo
         },
       ],

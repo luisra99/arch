@@ -17,6 +17,7 @@ const envSchema = z.object({
     SUPABASE_SERVICE_ROLE_KEY: z.string(),
     SUPABASE_BUCKET_NAME: z.string(),
     TOKEN_SECRET: z.string(),
+    SERVER_URL: z.url(),
 });
 
 const _env = envSchema.safeParse(process.env);

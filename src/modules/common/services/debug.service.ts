@@ -1,4 +1,4 @@
-import { clearCache } from "@/libs/cache";
+import { clearCache } from "../../../libs/cache";
 import path from "path";
 import { cwd } from "process";
 import fs from "fs";

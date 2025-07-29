@@ -1,4 +1,4 @@
-import logger from "@/libs/logger";
+import logger from "../libs/logger";
 import { Request, Response, NextFunction } from "express"
 
 export function httpLogger(req: Request, res: Response, next: NextFunction) {
