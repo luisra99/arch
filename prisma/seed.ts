@@ -1,6 +1,6 @@
+import logger from "@/libs/logger";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { logger } from "../src/utils/logger";
 const prisma = new PrismaClient();
 
 async function main() {
@@ -27,7 +27,7 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error(e);
+    logger.error(e);
     process.exit(1);
   })
   .finally(async () => {

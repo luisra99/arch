@@ -12,6 +12,27 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": true,
-    "noEmitOnError": true             // No emitir archivos si hay errores
+    "noEmitOnError": true ,            // No emitir archivos si hay errores
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@config/*": [
+        "./config/*"
+      ],
+      "@types/*": [
+        "./src/types/*"
+      ],
+       "@utils/*": [
+        "./src/utils/*"
+      ], "@modules/*": [
+        "./src/modules/*"
+      ], "@libs/*": [
+        "./src/libs/*"
+      ], "@middlewares/*": [
+        "./src/middlewares/*"
+      ]
+    }
   }
 }

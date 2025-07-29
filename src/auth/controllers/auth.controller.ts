@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { createUser, findUserByUsername, validatePassword } from "../models/User";
 import { generateToken, parseJwt, verifyToken } from "../helpers/jwt";
-import { logger } from "../../utils/logger";
 import axios from "axios";
+import logger from "@/libs/logger";
+import { env } from "@config/env";
 
 
 export const register = async (req: Request, res: Response) => {
@@ -61,9 +62,9 @@ export const signInWithGoogle = async (req: Request, res: Response) => {
     try {
         const { data } = await axios.post('https://oauth2.googleapis.com/token', {
             code: code?.toString() || "",
-            client_id: process.env.CLIENT_ID || "",
-            client_secret: process.env.CLIENT_SECRET || "",
-            redirect_uri: process.env.REDIRECT_URL || "",
+            client_id: env.CLIENT_ID || "",
+            client_secret: env.CLIENT_SECRET || "",
+            redirect_uri: env.REDIRECT_URL || "",
             grant_type: 'authorization_code',
         }, {
             headers: {

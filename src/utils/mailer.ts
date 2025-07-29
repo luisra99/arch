@@ -1,16 +1,17 @@
 import nodemailer from "nodemailer";
+import { env } from "@config/env";
 
 export const sendShareEmail = async (to: string, link: string) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
+      user: "env.SMTP_USER",
+      pass: "env.SMTP_PASS"
     }
   });
 
   await transporter.sendMail({
-    from: `"Tu App" <${process.env.SMTP_USER}>`,
+    from: `"Tu App" <${"env.SMTP_USER"}>`,
     to,
     subject: "Has recibido una carpeta o archivo",
     html: `<p>Haz clic para descargar: <a href="${link}">${link}</a></p>`

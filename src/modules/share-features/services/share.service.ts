@@ -1,14 +1,14 @@
 import { v4 as uuid } from "uuid";
 import { PrismaClient } from "@prisma/client";
 import { AppError } from "../../../types/errors";
-import { getFolderZipStream } from "../../prospects-documentation/services/file.service";
+import { getFolderZipStreamService } from "../../prospects-documentation/services/file.service";
 import supabase from "../../../libs/supabase";
 import { sendShareEmail } from "../../../utils/mailer";
-const prisma = new PrismaClient();
+import { prismaInstance } from "prisma/client";
 
-const BASE_URL = process.env.SHARE_BASE_URL!;
+const BASE_URL = env.SHARE_BASE_URL!;
 
-export const createShareToken = async ({
+export const createShareTokenService = async ({
   type,
   path,
   email
@@ -16,7 +16,7 @@ export const createShareToken = async ({
   type: "FILE" | "FOLDER";
   path: string;
   email: string;
-}) => {
+}, prisma = prismaInstance) => {
   const token = uuid();
   const expiresAt = new Date(Date.now() + 1000 * 60 * 30);
 
@@ -28,7 +28,7 @@ export const createShareToken = async ({
   await sendShareEmail(email, link);
 };
 
-export const consumeShareToken = async (token: string): Promise<{ type: "FILE" | "FOLDER"; path: string }> => {
+export const consumeShareTokenService = async (token: string, prisma = prismaInstance): Promise<{ type: "FILE" | "FOLDER"; path: string }> => {
   const record = await prisma.shareToken.findUnique({ where: { token } });
 
   if (!record || record.expiresAt < new Date())
@@ -39,12 +39,12 @@ export const consumeShareToken = async (token: string): Promise<{ type: "FILE" |
   return { type: record.type, path: record.path };
 };
 
-export const getDownloadStream = async (type: "FILE" | "FOLDER", path: string) => {
-  if (type === "FOLDER") return await getFolderZipStream(path);
+export const getDownloadStreamService = async (type: "FILE" | "FOLDER", path: string) => {
+  if (type === "FOLDER") return await getFolderZipStreamService(path);
 
   const { data: urlData, error } = await supabase
     .storage
-    .from(process.env.SUPABASE_BUCKET_NAME!)
+    .from(env.SUPABASE_BUCKET_NAME!)
     .createSignedUrl(path, 60);
 
   if (error || !urlData?.signedUrl)

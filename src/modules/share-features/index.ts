@@ -3,7 +3,7 @@ import { downloadSharedContentController, sendShareLinkController } from "./cont
 
 const router = Router();
 
-router.post("/send", sendShareLinkController);     // envía correo
-router.get("/:token", downloadSharedContentController); // descarga única
+router.post("/share/send", sendShareLinkController);     // envía correo
+router.get("/share/:token", downloadSharedContentController); // descarga única
 
 export default router;

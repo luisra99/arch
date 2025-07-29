@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-export const listUsers = async (req: Request, res: Response) => {
+export const listUsersController = async (req: Request, res: Response) => {
   try {
     const users = await prisma.user.findMany({
       orderBy: { username: "asc" },
@@ -12,17 +12,12 @@ export const listUsers = async (req: Request, res: Response) => {
     });
     res.status(200).json(users);
   } catch (error) {
-    const err = error as Error & { code?: string };
-    const descriptionError = {
-      message: "Error listando los usuarios.",
-      code: err.code || "SERVER_ERROR",
-      stackTrace: err.stack || "NO_STACK_TRACE_AVAILABLE",
-    };
+   
     res.status(500).json(descriptionError);
   }
 };
 
-export const deleteUser = async (req: Request, res: Response) => {
+export const deleteUserController = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const users = await prisma.user.update({
@@ -31,17 +26,12 @@ export const deleteUser = async (req: Request, res: Response) => {
     });
     res.status(200).json(users);
   } catch (error) {
-    const err = error as Error & { code?: string };
-    const descriptionError = {
-      message: "Error listando los usuarios.",
-      code: err.code || "SERVER_ERROR",
-      stackTrace: err.stack || "NO_STACK_TRACE_AVAILABLE",
-    };
+    
     res.status(500).json(descriptionError);
   }
 };
 
-export const updateUser = async (req: Request, res: Response) => {
+export const updateUserController = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -51,12 +41,7 @@ export const updateUser = async (req: Request, res: Response) => {
     });
     res.status(200).json(users);
   } catch (error) {
-    const err = error as Error & { code?: string };
-    const descriptionError = {
-      message: "Error listando los usuarios.",
-      code: err.code || "SERVER_ERROR",
-      stackTrace: err.stack || "NO_STACK_TRACE_AVAILABLE",
-    };
+    
     res.status(500).json(descriptionError);
   }
 };

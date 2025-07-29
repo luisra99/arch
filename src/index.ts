@@ -1,16 +1,14 @@
-import AuthRoute from "./auth/routes";
-import ConceptRoute from "./routes/common/concepts.route";
-import OptionsRoute from "./routes/common/options.route";
-import Debug from "./routes/common/debug.route";
-import Prospects from "./routes/prospects.route";
 import cron from "node-cron";
-import UserRoute from "./routes/common/users.route";
-import { authenticate } from "./auth/middlewares/auth.middleware";
-import { logger } from "./utils/logger";
-import { errorHandler } from "./middlewares/errorLogs.middleware";
 import app from "./app";
-import { sendUnattendedProspectsEmail } from "./services/prospect.service";
-import ProspectsFiles from "./modules/prospects-documentation";
+import logger from "@libs/logger";
+import { errorLogger } from "@middlewares/error.logs.middleware";
+import { authenticate } from "./auth/middlewares/auth.middleware";
+import AuthRoute from "./auth/routes";
+import Common from "@modules/common"
+import ProspectsFiles from "@modules/prospects-documentation";
+import Prospects from "@modules/prospects"
+import { sendUnattendedProspectsEmailService } from "@modules/prospects/services/mailing.prospect.service";
+import { env } from "@config/env";
 
 const os = require("os");
 const cluster = require("cluster");
@@ -30,20 +28,18 @@ if (cluster.isMaster) {
     cluster.fork();
   });
 } else {
-  cron.schedule("30 11 * * *", sendUnattendedProspectsEmail);
-  cron.schedule("30 07 * * *", sendUnattendedProspectsEmail);
-  app.use(Debug);
+  cron.schedule("30 11 * * *", ()=>sendUnattendedProspectsEmailService());
+  cron.schedule("30 07 * * *", ()=>sendUnattendedProspectsEmailService());
+  
   app.use(AuthRoute);
   app.use(Prospects);
   app.use(ProspectsFiles);
-  app.use(authenticate, UserRoute);
-  app.use(authenticate, OptionsRoute);
-  app.use(authenticate, ConceptRoute);
+  app.use(authenticate, Common);
   
-  app.use(errorHandler);
-  app.listen(process.env.PORT, () => {
+  app.use(errorLogger);
+  app.listen(env.PORT, () => {
     logger.info(
-      `Worker ${process.pid} escuchando en el puerto ${process.env.PORT}`
+      `Worker ${process.pid} escuchando en el puerto ${env.PORT}`
     );
   });
 }

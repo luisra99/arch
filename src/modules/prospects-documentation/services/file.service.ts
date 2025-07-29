@@ -1,13 +1,13 @@
 
-import { closeSync, readFileSync, unlinkSync } from "fs";
+import { readFileSync, unlinkSync } from "fs";
 import supabase from "../../../libs/supabase";
-import { getProspectFolderName } from "../../../utils/folderName.utils";
 import { AppError } from "../../../types/errors";
 import archiver from "archiver";
 import { Buffer } from "buffer";
 import { getFileTypeFromExtension, sanitizeFilename } from "../../../utils/file.utils";
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { prismaInstance } from "prisma/client";
+import { getMimeType } from "../utils/file.utils";
+import { env } from "@config/env";
 
 type TreeNode = {
   name: string;
@@ -16,10 +16,10 @@ type TreeNode = {
   children?: TreeNode[];
 };
 
-export const listFilesRecursively = async (prefix: string = ""): Promise<TreeNode[]> => {
+export const listFilesRecursivelyService = async (prefix: string = ""): Promise<TreeNode[]> => {
   const { data, error } = await supabase
     .storage
-    .from(process.env.SUPABASE_BUCKET_NAME!)
+    .from(env.SUPABASE_BUCKET_NAME!)
     .list(prefix); // sin recursive
 
   if (error) throw new Error(`Error al listar ${prefix}: ${error.message}`);
@@ -33,7 +33,7 @@ export const listFilesRecursively = async (prefix: string = ""): Promise<TreeNod
 
     if (item.metadata === null) {
       // 📁 Carpeta
-      const children = await listFilesRecursively(itemPath);
+      const children = await listFilesRecursivelyService(itemPath);
       result.push({
         name: item.name,
         path: itemPath,
@@ -52,7 +52,8 @@ export const listFilesRecursively = async (prefix: string = ""): Promise<TreeNod
 
   return result;
 };
-export const uploadBase64File = async ({
+
+export const uploadBase64FileService = async ({
   base64,
   name,
   type,
@@ -68,7 +69,7 @@ export const uploadBase64File = async ({
   const path = `prospects/${prospectId}/${type}s/${Date.now()}-${name}`;
 
   const { error } = await supabase.storage
-    .from(process.env.SUPABASE_BUCKET_NAME!)
+    .from(env.SUPABASE_BUCKET_NAME!)
     .upload(path, buffer, {
       contentType: getMimeType(extension),
       upsert: true
@@ -76,24 +77,16 @@ export const uploadBase64File = async ({
 
   if (error) throw new AppError(error.message, 500);
 
-  const url = supabase.storage.from(process.env.SUPABASE_BUCKET_NAME!)
+  const url = supabase.storage.from(env.SUPABASE_BUCKET_NAME!)
     .getPublicUrl(path).data.publicUrl;
 
   return { path, url };
 };
 
-function getMimeType(ext: string | undefined) {
-  if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
-  if (ext === "png") return "image/png";
-  if (ext === "pdf") return "application/pdf";
-  if (ext === "mp4") return "video/mp4";
-  return "application/octet-stream";
-}
-
-export const getFolderZipStream = async (folder: string) => {
+export const getFolderZipStreamService = async (folder: string) => {
   const { data, error } = await supabase
     .storage
-    .from(process.env.SUPABASE_BUCKET_NAME!)
+    .from(env.SUPABASE_BUCKET_NAME!)
     .list(folder);
 
   if (error) throw new AppError("Error al obtener archivos", 500);
@@ -102,7 +95,7 @@ export const getFolderZipStream = async (folder: string) => {
   for (const file of data) {
     const { data: signedUrlData } = await supabase
       .storage
-      .from(process.env.SUPABASE_BUCKET_NAME!)
+      .from(env.SUPABASE_BUCKET_NAME!)
       .createSignedUrl(`${folder}/${file.name}`, 60);
 
     if (signedUrlData?.signedUrl) {
@@ -116,13 +109,13 @@ export const getFolderZipStream = async (folder: string) => {
   return archive;
 };
 
-export const shareFolderWithUser = async (folder: string, email: string) => {
+export const shareFolderWithUserService = async (folder: string, email: string) => {
   // Aquí podés guardar en DB o mandar invitación
   // Ejemplo: guardar en tabla Share(folder, email)
-  return true;
+  throw "No implemented exception"
 };
 
-export const uploadProspectFile = async ({
+export const uploadProspectFileService = async ({
   localPath,
   originalName,
   mimeType,
@@ -140,7 +133,7 @@ export const uploadProspectFile = async ({
     phone?: string;
     createdAt: Date;
   };
-}) => {
+}, prisma = prismaInstance) => {
   if(!prospect.id){
     const {id} =await prisma.prospects.create({data:prospect})
     prospect.id=id
@@ -152,7 +145,7 @@ export const uploadProspectFile = async ({
   const fileBuffer = readFileSync(localPath);
 
   const { error } = await supabase.storage
-    .from(process.env.SUPABASE_BUCKET_NAME!)
+    .from(env.SUPABASE_BUCKET_NAME!)
     .upload(storagePath, fileBuffer, {
       contentType: mimeType,
       upsert: true
@@ -162,7 +155,7 @@ export const uploadProspectFile = async ({
   if (error) throw new AppError(error.message, 500);
 
   const publicUrl = supabase.storage
-    .from(process.env.SUPABASE_BUCKET_NAME!)
+    .from(env.SUPABASE_BUCKET_NAME!)
     .getPublicUrl(storagePath).data.publicUrl;
 
   return { path: storagePath, url: publicUrl,id:prospect.id };
@@ -170,7 +163,7 @@ export const uploadProspectFile = async ({
 
 export const deleteFileService = async (path: string) => {
   const { error } = await supabase.storage
-    .from(process.env.SUPABASE_BUCKET_NAME!)
+    .from(env.SUPABASE_BUCKET_NAME!)
     .remove([path]);
 
   if (error) throw new AppError("Error al eliminar archivo", 500);
@@ -179,7 +172,7 @@ export const deleteFileService = async (path: string) => {
 export const renameFileService = async (oldPath: string, newPath: string) => {
   console.log("newPath",newPath,oldPath)
   const { data: download, error: downloadErr } = await supabase.storage
-    .from(process.env.SUPABASE_BUCKET_NAME!)
+    .from(env.SUPABASE_BUCKET_NAME!)
     .download(oldPath);
 
   if (downloadErr || !download) throw new AppError("No se pudo descargar archivo", 500);
@@ -187,7 +180,7 @@ export const renameFileService = async (oldPath: string, newPath: string) => {
   const buffer = await download.arrayBuffer();
 
   const { error: uploadErr } = await supabase.storage
-    .from(process.env.SUPABASE_BUCKET_NAME!)
+    .from(env.SUPABASE_BUCKET_NAME!)
     .upload(newPath, buffer, {
       contentType: "application/octet-stream",
       upsert: true
@@ -200,22 +193,22 @@ export const renameFileService = async (oldPath: string, newPath: string) => {
   return {
     path: newPath,
     url: supabase.storage
-      .from(process.env.SUPABASE_BUCKET_NAME!)
+      .from(env.SUPABASE_BUCKET_NAME!)
       .getPublicUrl(newPath).data.publicUrl
   };
 };
 
-export const moveFileOrFolder = async (from: string, to: string) => {
+export const moveFileOrFolderService = async (from: string, to: string) => {
   const { data, error } = await supabase
     .storage
-    .from(process.env.SUPABASE_BUCKET_NAME!)
+    .from(env.SUPABASE_BUCKET_NAME!)
     .list(from);
 
   if (!data?.length) {
     // es un archivo
     const move = await supabase
       .storage
-      .from(process.env.SUPABASE_BUCKET_NAME!)
+      .from(env.SUPABASE_BUCKET_NAME!)
       .move(from, `${to}/${from.split("/").pop()}`);
 
     if (move.error) throw new AppError(move.error.message+" moviendo archivo", 500);
@@ -229,7 +222,7 @@ export const moveFileOrFolder = async (from: string, to: string) => {
 
     const move = await supabase
       .storage
-      .from(process.env.SUPABASE_BUCKET_NAME!)
+      .from(env.SUPABASE_BUCKET_NAME!)
       .move(sourcePath, destPath);
 
     if (move.error) throw new AppError(move.error.message+" moviendo carpeta", 500);
