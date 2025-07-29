@@ -1,4 +1,6 @@
 dist
+.env
+.env.template
 node_modules
 dev-dist
 .husky
