@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { clearCacheService, getAllLogsService, getErrorsLogsPathService } from "../services/debug.service";
-import logger from "@libs/logger";
+import logger from "@/libs/logger";
 
 export const clearCacheController = (req: Request, res: Response) => {
     clearCacheService()

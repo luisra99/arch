@@ -18,21 +18,6 @@
       "@/*": [
         "./src/*"
       ],
-      "@config/*": [
-        "./config/*"
-      ],
-      "@types/*": [
-        "./src/types/*"
-      ],
-       "@utils/*": [
-        "./src/utils/*"
-      ], "@modules/*": [
-        "./src/modules/*"
-      ], "@libs/*": [
-        "./src/libs/*"
-      ], "@middlewares/*": [
-        "./src/middlewares/*"
-      ]
     }
   }
 }

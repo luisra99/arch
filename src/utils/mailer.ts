@@ -1,5 +1,4 @@
 import nodemailer from "nodemailer";
-import { env } from "@config/env";
 
 export const sendShareEmail = async (to: string, link: string) => {
   const transporter = nodemailer.createTransport({

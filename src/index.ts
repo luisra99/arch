@@ -1,14 +1,14 @@
 import cron from "node-cron";
 import app from "./app";
-import logger from "@libs/logger";
-import { errorLogger } from "@middlewares/error.logs.middleware";
+import { errorLogger } from "@/middlewares/error.logs.middleware";
 import { authenticate } from "./auth/middlewares/auth.middleware";
 import AuthRoute from "./auth/routes";
-import Common from "@modules/common"
-import ProspectsFiles from "@modules/prospects-documentation";
-import Prospects from "@modules/prospects"
-import { sendUnattendedProspectsEmailService } from "@modules/prospects/services/mailing.prospect.service";
-import { env } from "@config/env";
+import Common from "@/modules/common"
+import ProspectsFiles from "@/modules/prospects-documentation";
+import Prospects from "@/modules/prospects"
+import { sendUnattendedProspectsEmailService } from "@/modules/prospects/services/mailing.prospect.service";
+import logger from "@/libs/logger";
+import {env} from "@/config/env"
 
 const os = require("os");
 const cluster = require("cluster");

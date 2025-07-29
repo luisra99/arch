@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { createConceptController, deleteConceptController, getConceptByIdController, getConceptsController, updateConceptController } from "./controllers/concept.controller";
-import { resetCache, smartCache } from "@middlewares/smartCache.middleware";
-import { clearCacheMiddleware } from "@libs/cache";
+import { resetCache, smartCache } from "@/middlewares/smartCache.middleware";
+import { clearCacheMiddleware } from "@/libs/cache";
 import { clearCacheController, getAllLogsController, getErrorsLogsController } from "./controllers/debug.controller";
 import { deleteUserController, listUsersController, updateUserController } from "./controllers/users.controller";
 

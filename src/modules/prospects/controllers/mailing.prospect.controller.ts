@@ -7,7 +7,7 @@ import {
   sendQuestionConfirmationEmailService,
 } from "../services/mailing.prospect.service"; // Asume que tienes un servicio de correo
 import { createProspectService, getProspectByEmailService, updateProspectService } from "../services/manage.prospect.service";
-import { env } from "@config/env";
+import { env } from "@/config/env";
 
 export const contactProspectController = async (req: Request, res: Response) => {
   try {

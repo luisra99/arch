@@ -1,6 +1,7 @@
-import { transporter } from "@libs/nodemailer";
+import { transporter } from "@/libs/nodemailer";
 import { createConfirmationEmail, createContactEmail, createQuestionConfirmationEmail, createQuestionToAdminEmail, createResponseEmail, createUnattendedProspectsEmail } from "../utils/email-generator";
 import { prismaInstance } from "prisma/client";
+import { env } from "@/config/env";
 
 export const sendUnattendedProspectsEmailService = async (prisma=prismaInstance) => {
   const prospects = await prisma.prospects.findMany({
