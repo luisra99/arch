@@ -1,6 +1,13 @@
+import path from 'path';
+import fs from 'fs';
 import pino from 'pino';
 // Destino para los errores
 
+// Verifica y crea la carpeta './logs' si no existe
+const logDir = path.resolve('./logs');
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir);
+}
 const logger = pino(
   {
     level: 'info', // Solo info y más severos
