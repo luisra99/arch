@@ -4,6 +4,7 @@ import { env } from "../config/env"
 
 
 export function errorLogger(err: Error, req: Request, res: Response,) {
+  console.log(req.body);
   const error = {
     message: err.message,
     stack: err.stack,

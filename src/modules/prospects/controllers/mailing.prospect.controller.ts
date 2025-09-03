@@ -39,7 +39,7 @@ export const contactProspectController = async (req: Request, res: Response) => 
 
     res.status(201).json(newProspect);
   } catch (error: any) {
-    return res.status(error.status || 500).json({ message: error.message || "Ha ocurrido un error" });
+    return res.status(error.send || 500).json({ message: error.message || "Ha ocurrido un error" });
   }
 };
 export const questionFromProspectController = async (req: Request, res: Response) => {
@@ -108,7 +108,7 @@ export const questionFromProspectController = async (req: Request, res: Response
       return res.status(200).json(updatedProspect);
     }
   } catch (error: any) {
-    return res.status(error.status || 500).json({ message: error.message || "Ha ocurrido un error" });
+    return res.status(error.send || 500).json({ message: error.message || "Ha ocurrido un error" });
   }
 };
 export const answerProspectQuestionController = async (req: Request, res: Response) => {
@@ -157,6 +157,6 @@ export const answerProspectQuestionController = async (req: Request, res: Respon
     }
     res.status(200).json({ message: "Respuesta enviada con éxito" });
   } catch (error: any) {
-    return res.status(error.status || 500).json({ message: error.message || "Ha ocurrido un error" });
+    return res.status(error.send || 500).json({ message: error.message || "Ha ocurrido un error" });
   }
 };

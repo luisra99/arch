@@ -13,3 +13,4 @@ export const getProspectFolderName = (p: {
   if(p?.createdAt) return p?.createdAt?.toISOString()?.split?.("T")[0];
   return (new Date())?.toISOString()?.split?.("T")[0];
 };
+

@@ -83,7 +83,7 @@ export const uploadBase64FileService = async ({
   return { path, url };
 };
 
-export const getFolderZipStreamService = async (folder: string) => {
+export const getFolderZipStreamService = async (folder: string,name:string) => {
   const { data, error } = await supabase
     .storage
     .from(env.SUPABASE_BUCKET_NAME!)
@@ -101,7 +101,7 @@ export const getFolderZipStreamService = async (folder: string) => {
     if (signedUrlData?.signedUrl) {
       const res = await fetch(signedUrlData.signedUrl);
       const buffer = await res.arrayBuffer();
-      archive.append(Buffer.from(buffer), { name: file.name });
+      archive.append(Buffer.from(buffer), { name });
     }
   }
 

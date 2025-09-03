@@ -36,7 +36,7 @@ if (cluster.isMaster) {
   app.use(ProspectsFiles);
   app.use(authenticate, Common);
   
-  app.use(errorLogger);
+  // app.use(errorLogger);
   app.listen(env.PORT, () => {
     logger.info(
       `Worker ${process.pid} escuchando en el puerto ${env.PORT}`

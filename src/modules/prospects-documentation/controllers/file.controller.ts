@@ -69,11 +69,11 @@ export const getTreeController = async (req: Request, res: Response) => {
 
 export const downloadZipController = async (req: Request, res: Response) => {
   try {
-    const folder = req.query.folder as string;
-    const zipStream = await getFolderZipStreamService(folder);
+    const {folder,name} = req.query;
+    const zipStream = await getFolderZipStreamService(folder as string,name as string);
 
     res.setHeader("Content-Type", "application/zip");
-    res.setHeader("Content-Disposition", `attachment; filename="${folder}.zip"`);
+    res.setHeader("Content-Disposition", `attachment; filename="${name}.zip"`);
 
     zipStream.pipe(res);
   }
