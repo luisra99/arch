@@ -79,7 +79,7 @@ export const createUnattendedProspectsEmail = ({ completeProspects, incompleteCo
   `;
     return htmlContent
 }
-export const createContactEmail = ({ name, lastName, address, prospectEmail, phone, state, city, postal, prospect }: any) => {
+export const createContactEmail = ({ name, lastName, address, prospectEmail, phone, state, city, postal, metadata }: any) => {
     const phoneButtons =
         phone && phone !== "Not specified"
             ? `
@@ -98,7 +98,7 @@ export const createContactEmail = ({ name, lastName, address, prospectEmail, pho
       City: ${city}
       State: ${state}
       Postal Code: ${postal}
-      Message: ${prospect.metadata?.message || "Not specified"}
+      Message: ${metadata?.message || "Not specified"}
       `
     const html = `
             <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #333;">
@@ -112,7 +112,7 @@ export const createContactEmail = ({ name, lastName, address, prospectEmail, pho
                   <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">City</td><td style="padding: 8px; border: 1px solid #ddd;">${city}</td></tr>
                   <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">State</td><td style="padding: 8px; border: 1px solid #ddd;">${state}</td></tr>
                   <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Postal Code</td><td style="padding: 8px; border: 1px solid #ddd;">${postal}</td></tr>
-                  <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Message</td><td style="padding: 8px; border: 1px solid #ddd;">${prospect.metadata?.message || "Not specified"
+                  <tr><td style="font-weight: bold; padding: 8px; border: 1px solid #ddd;">Message</td><td style="padding: 8px; border: 1px solid #ddd;">${metadata?.message || "Not specified"
         }</td></tr>
                 </tbody>
               </table>

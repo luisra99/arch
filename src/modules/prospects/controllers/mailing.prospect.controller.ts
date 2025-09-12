@@ -8,6 +8,7 @@ import {
 } from "../services/mailing.prospect.service"; // Asume que tienes un servicio de correo
 import { createProspectService, getProspectByEmailService, updateProspectService } from "../services/manage.prospect.service";
 import { env } from "../../../config/env";
+import logger from "../../../libs/logger";
 
 export const contactProspectController = async (req: Request, res: Response) => {
   try {
@@ -39,6 +40,7 @@ export const contactProspectController = async (req: Request, res: Response) => 
 
     res.status(201).json(newProspect);
   } catch (error: any) {
+    logger.error(error)
     return res.status(error.send || 500).json({ message: error.message || "Ha ocurrido un error" });
   }
 };
