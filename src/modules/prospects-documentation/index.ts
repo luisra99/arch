@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
     getTreeController,
-    downloadZipController,
+    downloadSignedZipController,
     shareFolderController, renameFileController,
     deleteFileController,
     uploadFileController,
@@ -14,7 +14,7 @@ const upload = multer({ dest: "tmp/" });
 
 router.get("/files/tree/:prospectId", getTreeController);
 router.get("/files/tree", getTreeController);
-router.get("/files/zip", downloadZipController);
+router.get("/files/zip", downloadSignedZipController);
 router.post("/files/share", shareFolderController);
 
 router.post("/files/upload", upload.single("file"), uploadFileController);

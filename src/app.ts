@@ -14,7 +14,9 @@ app.use(
   })
 );
 
-app.use(compression());
+app.use(compression({
+  filter: (req:any, res:any) => req.path.startsWith("/api/files/zip") ? false : compression.filter(req, res)
+}));
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cookieParser());
