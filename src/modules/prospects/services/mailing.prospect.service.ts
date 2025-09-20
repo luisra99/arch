@@ -5,7 +5,7 @@ import { prismaInstance } from "../../../../prisma/client";
 
 
 export const sendUnattendedProspectsEmailService = async (prisma=prismaInstance) => {
-  const prospects = await prisma.prospects.findMany({
+  const prospects = await prismaInstance.prospects.findMany({
     where: { attended: null },
   });
 
