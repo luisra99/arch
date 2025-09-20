@@ -1,7 +1,7 @@
 import { answerProspectQuestionController, contactProspectController,  questionFromProspectController } from "../../modules/prospects/controllers/mailing.prospect.controller";
 import { sendUnattendedProspectsEmailService } from "../../modules/prospects/services/mailing.prospect.service";
 import { Router } from "express";
-import { createProspectController, getActiveProspects, getProspectById, updateProspect, deleteProspect, markAsAttended } from "./controllers/manage.prospect.controller";
+import { createProspectController, getActiveProspects, getProspectById, updateProspect, deleteProspect, markAsAttended, restoreProspect } from "./controllers/manage.prospect.controller";
 
 const router = Router();
 //Mailing
@@ -14,6 +14,7 @@ router.put("/prospect/manage/:id", updateProspect);
 router.get("/prospect/manage", getActiveProspects);
 router.get("/prospect/manage/:id", getProspectById);
 router.delete("/prospect/manage/:id", deleteProspect);
+router.patch("/prospect/manage/:id", restoreProspect);
 router.post("/prospect/:id/atender", markAsAttended);
 router.get("/prospect/unattended", sendUnattendedProspectsEmailService);
 

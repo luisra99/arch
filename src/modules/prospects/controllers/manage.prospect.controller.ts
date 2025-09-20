@@ -28,7 +28,8 @@ export const getAllProspects = async (req: Request, res: Response) => {
 
 export const getActiveProspects = async (req: Request, res: Response) => {
   try {
-    const prospects = await getActiveProspectsService()
+    const {mode}=req.query
+    const prospects = await getActiveProspectsService(mode)
     res.status(200).json(prospects);
   } catch (error: any) {
     return res.status(error.status || 500).json({ message: error.message || "Ha ocurrido un error" });
@@ -89,6 +90,20 @@ export const deleteProspect = async (req: Request, res: Response) => {
     await prismaInstance.prospects.update({
       where: { id },
       data: { deleted: new Date(Date.now()) },
+    });
+
+    res.status(204).send();
+  } catch (error: any) {
+    return res.status(error.status || 500).json({ message: error.message || "Ha ocurrido un error" });
+  }
+};
+export const restoreProspect = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    await prismaInstance.prospects.update({
+      where: { id },
+      data: { deleted: null },
     });
 
     res.status(204).send();
