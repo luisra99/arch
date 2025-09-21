@@ -1,7 +1,6 @@
 import { deleteFileService, listFilesRecursivelyService, renameFileService, uploadBase64FileService, uploadProspectFileService } from "../services/file.service";
 import { Request, Response } from "express";
 import {
-  getFolderZipStreamService,
   shareFolderWithUserService
 } from "../services/file.service";
 
@@ -10,6 +9,49 @@ import { pipeline } from "stream/promises";
 import { listSignedUrlsService } from "../services/getFileStream.service";
 import archiver from "archiver";
 import { appendSignedFilesToArchive } from "../services/zipSignedUrls.service";
+import { getFolderZipStreamService } from "../services/zipFile.services";
+
+export const downloadZipController = async (req: Request, res: Response) => {
+  try {
+    const folder = String(req.query.folder || req.query.path || "");
+    const nameParam = String(req.query.name || "").trim();
+    const safe = folder.replace(/^\/+|\/+$/g, "");
+    if (!safe) return res.status(400).json({ message: "Falta el parámetro 'folder|path'." });
+
+    // Nombre del zip:
+    // - Si es folder completo → `${nameParam || 'all'}`
+    // - Si es subpath: `${nameParam} (${sub})`
+    // - Si es archivo: usa el nombre del archivo sin extensión opcionalmente
+    let filename = nameParam || "download";
+    if (safe.includes("/")) filename = `${nameParam || "all"} (${safe.split("/").pop()})`;
+    if (!nameParam && !safe.includes("/")) filename = safe || "download";
+
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}.zip"`);
+
+    const zipStream = await getFolderZipStreamService(safe, filename);
+
+    // Manejo robusto de backpressure y cierre
+    zipStream.on("error", (err) => {
+      // Evita sockets colgados
+      if (!res.headersSent) res.status(500);
+      res.end();
+      console.error("[ZIP stream error]", err);
+    });
+
+    // Si el cliente corta, cancelamos lectura para no seguir bajando blobs
+    res.on("close", () => {
+      if (!res.writableEnded) {
+        try { zipStream.destroy(); } catch {}
+      }
+    });
+
+    zipStream.pipe(res);
+  } catch (error: any) {
+    console.error("[downloadZipController]", error);
+    return res.status(error.status || 500).json({ message: error.message || "Ha ocurrido un error" });
+  }
+};
 
 export const moveFileController = async (req: Request, res: Response) => {
   const { from, to } = req.body;
@@ -105,21 +147,6 @@ export async function downloadSignedZipController(req: Request, res: Response) {
   await archive.finalize();
   await pipePromise;
 }
-
-export const downloadZipController = async (req: Request, res: Response) => {
-  try {
-    const {folder,name} = req.query;
-    const zipStream = await getFolderZipStreamService(folder as string,name as string);
-
-    res.setHeader("Content-Type", "application/zip");
-    res.setHeader("Content-Disposition", `attachment; filename="${name}.zip"`);
-
-    zipStream.pipe(res);
-  }
-  catch (error: any) {
-    return res.status(error.status || 500).json({ message: error.message || "Ha ocurrido un error" });
-  }
-};
 
 export const shareFolderController = async (req: Request, res: Response) => {
   try {
