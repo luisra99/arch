@@ -2,38 +2,43 @@ import { env } from "process";
 import { transporter } from "../../../libs/nodemailer";
 import { createConfirmationEmail, createContactEmail, createQuestionConfirmationEmail, createQuestionToAdminEmail, createResponseEmail, createUnattendedProspectsEmail } from "../utils/email-generator";
 import { prismaInstance } from "../../../../prisma/client";
+import logger from "../../../libs/logger";
 
 
-export const sendUnattendedProspectsEmailService = async (prisma=prismaInstance) => {
-  const prospects = await prismaInstance.prospects.findMany({
-    where: { attended: null },
-  });
+export const sendUnattendedProspectsEmailService = async (prisma = prismaInstance) => {
+  try {
+    const prospects = await prismaInstance.prospects.findMany({
+      where: { attended: null },
+    });
 
-  if (prospects.length === 0) {
-    console.log("No unattended prospects.");
-    return;
-  }
-  const completeProspects = [];
-  let incompleteCount = 0;
-  for (const p of prospects) {
-    const isIncomplete = !p.name && !p.lastName && !p.email && !p.phone;
-    if (isIncomplete) {
-      incompleteCount++;
-    } else {
-      completeProspects.push(p);
+    if (prospects.length === 0) {
+      console.log("No unattended prospects.");
+      return;
     }
+    const completeProspects = [];
+    let incompleteCount = 0;
+    for (const p of prospects) {
+      const isIncomplete = !p.name && !p.lastName && !p.email && !p.phone;
+      if (isIncomplete) {
+        incompleteCount++;
+      } else {
+        completeProspects.push(p);
+      }
+    }
+
+    const html = createUnattendedProspectsEmail({ completeProspects, incompleteCount })
+    const mailOptions = {
+      from: env.EMAIL_USER,
+      to: env.EMAIL_ADMIN_USER,
+      subject: "📌 Unattended Prospects - Dwellingplus",
+      html,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log("Unattended prospects email sent.");
+  } catch (error) {
+    logger.error(error)
   }
-
-  const html = createUnattendedProspectsEmail({ completeProspects, incompleteCount })
-  const mailOptions = {
-    from: env.EMAIL_USER,
-    to: env.EMAIL_ADMIN_USER,
-    subject: "📌 Unattended Prospects - Dwellingplus",
-    html,
-  };
-
-  await transporter.sendMail(mailOptions);
-  console.log("Unattended prospects email sent.");
 };
 
 export const sendContactEmailService = async ({
@@ -140,12 +145,12 @@ export const sendQuestionToAdminEmailService = async ({
   phone?: string;
   question: string;
 }) => {
-  const { html, text } = createQuestionToAdminEmail({ phone,email,question, })
+  const { html, text } = createQuestionToAdminEmail({ phone, email, question, })
   const mailOptions = {
     from: env.EMAIL_USER,
     to,
     subject,
-    text ,
+    text,
     html,
   };
   await transporter.sendMail(mailOptions);
