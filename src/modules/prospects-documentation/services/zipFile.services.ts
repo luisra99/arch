@@ -139,7 +139,7 @@ export async function getFolderZipStreamService(inputPath: string, zipName?: str
   }
 
   // CAMBIO 4: cerrar y obtener el Blob final
-  await zipWriter.close(null); // no pases null
+  await zipWriter.close(); // no pases null
 
   const zipBlob = await zipBlobWriter.getData();
   // Convertir a Readable de Node de forma simple
