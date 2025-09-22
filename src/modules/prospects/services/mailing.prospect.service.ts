@@ -69,10 +69,11 @@ export const sendContactEmailService = async ({
     state = "Not specified",
     city = "Not specified",
     postal = "Not specified",
+    metadata
   } = prospect;
 
   // Phone action buttons if phone is provided and not the default "Not specified"
-  const { html, text } = createContactEmail({ name, lastName, address, prospectEmail, phone, state, city, postal })
+  const { html, text } = createContactEmail({ name, lastName, address, prospectEmail, phone, state, city, postal,metadata })
 
   const mailOptions = {
     from: env.EMAIL_USER,

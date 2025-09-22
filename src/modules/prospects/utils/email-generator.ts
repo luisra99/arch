@@ -219,17 +219,18 @@ export const createQuestionToAdminEmail = ({ phone, email, question }: any) => {
 }
 export const createResponseEmail = ({ answer, question }: any) => {
     const text = `Hello, thank you for your inquiry.
-Here is our response to ${question}:
+Here is our response:
 ${answer}
 We are here to help you.
 The Dwellingplus Team.`
+
     const html = `
       <div style="max-width: 600px; margin: auto; padding: 40px; font-family: Arial, sans-serif; background-color: #f9f9f9; border-radius: 12px; border: 1px solid #e0e0e0; color: #2c2c2c;">
         <div style="text-align: center; margin-bottom: 30px;">
           <img src="https://dwellingplus.studio/logo.png" alt="Dwellingplus Logo" style="width: 150px;" />
         </div>
         <h2 style="text-align: center; color: #1a1a1a;">Hello</h2>
-        <p style="font-size: 16px; line-height: 1.6;">Thank you for reaching out to us. Here is the answer to your inquiry:</p>
+        <p style="font-size: 16px; line-height: 1.6;">Thank you for reaching out to us. Here is the answer to your message: "${question}"</p>
         <blockquote style="margin: 20px 0; padding-left: 15px; border-left: 3px solid #ccc; font-style: italic;">
           ${answer}
         </blockquote>
