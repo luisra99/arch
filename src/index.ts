@@ -7,7 +7,7 @@ import ProspectsFiles from "./modules/prospects-documentation";
 import Prospects from "./modules/prospects"
 import { sendUnattendedProspectsEmailService } from "./modules/prospects/services/mailing.prospect.service";
 import logger from "./libs/logger";
-import {env} from "./config/env"
+import { env } from "./config/env"
 import { errorLogger } from "./middlewares/errors.middleware";
 
 const os = require("os");
@@ -21,22 +21,21 @@ if (cluster.isMaster) {
   for (let i = 0; i < 1; i++) {
     cluster.fork();
   }
-  
+
   // Reiniciar un worker si falla
   cluster.on("exit", (worker: any) => {
     console.log(`Worker ${worker.process.pid} murió, creando uno nuevo...`);
     cluster.fork();
   });
 } else {
-cron.schedule("30 11 * * *", () => sendUnattendedProspectsEmailService()); // 12:30 PM
-cron.schedule("30 07 * * *", () => sendUnattendedProspectsEmailService()); // 07:30 AM
-cron.schedule("00 14 * * *", () => sendUnattendedProspectsEmailService()); // 02:00 PM
+  cron.schedule("30 11 * * *", () => sendUnattendedProspectsEmailService()); // 11:30 PM
+  cron.schedule("30 07 * * *", () => sendUnattendedProspectsEmailService()); // 07:30 AM
 
   app.use(AuthRoute);
   app.use(Prospects);
   app.use(ProspectsFiles);
   app.use(authenticate, Common);
-  
+
   app.use(errorLogger);
   app.listen(env.PORT, () => {
     logger.info(
