@@ -28,15 +28,16 @@ if (cluster.isMaster) {
     cluster.fork();
   });
 } else {
-  cron.schedule("30 12 * * *", ()=>sendUnattendedProspectsEmailService());
-  cron.schedule("30 07 * * *", ()=>sendUnattendedProspectsEmailService());
-  
+cron.schedule("30 11 * * *", () => sendUnattendedProspectsEmailService()); // 12:30 PM
+cron.schedule("30 07 * * *", () => sendUnattendedProspectsEmailService()); // 07:30 AM
+cron.schedule("00 14 * * *", () => sendUnattendedProspectsEmailService()); // 02:00 PM
+
   app.use(AuthRoute);
   app.use(Prospects);
   app.use(ProspectsFiles);
   app.use(authenticate, Common);
   
-  // app.use(errorLogger);
+  app.use(errorLogger);
   app.listen(env.PORT, () => {
     logger.info(
       `Worker ${process.pid} escuchando en el puerto ${env.PORT}`
