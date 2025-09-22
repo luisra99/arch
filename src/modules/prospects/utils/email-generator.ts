@@ -217,9 +217,9 @@ export const createQuestionToAdminEmail = ({ phone, email, question }: any) => {
         `
     return { html, text }
 }
-export const createResponseEmail = ({ answer }: any) => {
+export const createResponseEmail = ({ answer, question }: any) => {
     const text = `Hello, thank you for your inquiry.
-Here is our response:
+Here is our response to ${question}:
 ${answer}
 We are here to help you.
 The Dwellingplus Team.`

@@ -6,14 +6,14 @@ import {
   sendAnswerToProspectEmailService,
   sendQuestionConfirmationEmailService,
 } from "../services/mailing.prospect.service"; // Asume que tienes un servicio de correo
-import { createProspectService, getProspectByEmailService, updateProspectService } from "../services/manage.prospect.service";
+import { createProspectService, getProspectByEmailService, getProspectByPhoneService, updateProspectService } from "../services/manage.prospect.service";
 import { env } from "../../../config/env";
 import logger from "../../../libs/logger";
 
 export const contactProspectController = async (req: Request, res: Response) => {
   try {
     const prospectData = req.body;
-
+    const { email, phone, metadata: { message } } = req.body
     // Validar datos básicos
     if (!prospectData.email && !prospectData.phone) {
       return res.status(400).json({ error: "Email or phone is required" });
@@ -22,7 +22,7 @@ export const contactProspectController = async (req: Request, res: Response) => 
     // Enviar correo de contacto
     await sendContactEmailService({
       to: env.EMAIL_ADMIN_USER ?? "", // Correo de la empresa
-      subject: "Nuevo prospecto de contacto",
+      subject: "New Contact",
       prospect: prospectData,
     });
 
@@ -30,15 +30,51 @@ export const contactProspectController = async (req: Request, res: Response) => 
     if (prospectData.email) {
       await sendConfirmationEmailService({
         to: prospectData.email,
-        subject: "Gracias por contactarnos",
+        subject: "Thanks for get in touch with us",
         prospect: prospectData,
       });
     }
+    let existing
+    if (email)
+      existing = await getProspectByEmailService(email)
+    else if (phone)
+      existing = await getProspectByPhoneService(phone)
 
-    // Opcional: Guardar en base de datos
-    const newProspect = await createProspectService(prospectData)
+    if (!existing)
+      await createProspectService({
+        ...prospectData,
+        metadata: {
+          question: { [Date.now()]: { question: message } },
+        },
+      })
+    else {
+      const previousMetadata: any = existing.metadata || {};
+      const previousQuestions = previousMetadata.question || {};
+      if (!previousMetadata.contacts) {
+        previousMetadata.contacts = []
+      }
+      if (!previousMetadata.otherAddresses) {
+        previousMetadata.otherAddresses = []
+      }
 
-    res.status(201).json(newProspect);
+      if (existing.phone != phone) previousMetadata.contacts.push(phone)
+      if (existing.email != email) previousMetadata.contacts.push(email)
+      if (existing.state && existing.city && existing.address) {
+        if (existing.state != prospectData.state || existing.city != prospectData.city || existing.address !== prospectData.address)
+          previousMetadata.otherAddresses.push([prospectData.state, prospectData.city, prospectData.address].join(", "))
+      }
+
+      const updatedProspect = await updateProspectService(existing.id, {
+        attended: null,
+        metadata: {
+          ...previousMetadata,
+          question: { ...previousQuestions, [Date.now()]: { question: message } },
+        },
+      })
+
+    }
+
+    res.status(201).json({ message: "Success" });
   } catch (error: any) {
     logger.error(error)
     return res.status(error.send || 500).json({ message: error.message || "Ha ocurrido un error" });
@@ -59,13 +95,16 @@ export const questionFromProspectController = async (req: Request, res: Response
 
   try {
     // Buscar si el prospecto ya existe
-
-    let existing = await getProspectByEmailService(email)
+    let existing;
+    if (email)
+      existing = await getProspectByEmailService(email)
+    else if (phone)
+      existing = await getProspectByPhoneService(phone)
 
     // Preparar mensaje para enviar al administrador
 
     // Enviar correo al admin
-    sendQuestionToAdminEmailService({
+    await sendQuestionToAdminEmailService({
       email,
       question,
       subject: "Nueva pregunta",
@@ -73,7 +112,7 @@ export const questionFromProspectController = async (req: Request, res: Response
       to: env.EMAIL_ADMIN_USER ?? "",
     });
     if (email)
-      sendQuestionConfirmationEmailService({
+      await sendQuestionConfirmationEmailService({
         to: email,
         subject: "Confirmation",
         question,
@@ -85,7 +124,7 @@ export const questionFromProspectController = async (req: Request, res: Response
         email,
         phone,
         metadata: {
-          question: [question],
+          question: { [Date.now()]: { question } },
         },
       })
 
@@ -94,16 +133,13 @@ export const questionFromProspectController = async (req: Request, res: Response
     } else {
       // Si ya existe, actualizamos el metadata y attended
       const previousMetadata: any = existing.metadata || {};
-      const previousQuestions = Array.isArray(previousMetadata.question)
-        ? previousMetadata.question
-        : previousMetadata.question
-          ? [previousMetadata.question]
-          : [];
+      const previousQuestions = previousMetadata.question || {};
+
       const updatedProspect = await updateProspectService(existing.id, {
         attended: null,
         metadata: {
           ...previousMetadata,
-          question: [...previousQuestions, question],
+          question: { ...previousQuestions, [Date.now()]: { question } },
         },
       })
 
@@ -115,50 +151,33 @@ export const questionFromProspectController = async (req: Request, res: Response
 };
 export const answerProspectQuestionController = async (req: Request, res: Response) => {
   try {
-    const { email, answer } = req.body;
-
+    const { email, answer, questionId } = req.body;
     if (!email || !answer) {
       return res.status(400).json({ error: "Email and answer are required" });
     }
-    // Enviar correo con la respuesta
-    await sendAnswerToProspectEmailService({
-      to: email,
-      subject: "About your question",
-      answer,
-    });
-
     let existing = await getProspectByEmailService(email)
-
     if (!existing) {
       // Si no existe, lo creamos
-
-      const newProspect = await createProspectService({
-        data: {
-          email,
-          metadata: {
-            answer: [answer],
-          },
-        },
-      })
+      return res.status(404).json({ message: "Prospect not found." });
     } else {
       // Si ya existe, actualizamos el metadata y attended
-      const previousMetadata: any = existing.metadata || {};
-      const previousAnswers = Array.isArray(previousMetadata.answer)
-        ? previousMetadata.answer
-        : previousMetadata.answer
-          ? [previousMetadata.answer]
-          : [];
+      (existing.metadata as any).question[questionId].answer = answer
+      // Enviar correo con la respuesta
+      await sendAnswerToProspectEmailService({
+        to: email,
+        subject: "About your question",
+        question: (existing.metadata as any).question[questionId].question,
+        answer
+      });
 
       const updatedProspect = await updateProspectService(existing.id, {
         attended: null,
-        metadata: {
-          ...previousMetadata,
-          answer: [...previousAnswers, answer],
-        },
+        metadata: existing.metadata,
       })
     }
     res.status(200).json({ message: "Respuesta enviada con éxito" });
   } catch (error: any) {
+    logger.error(error)
     return res.status(error.send || 500).json({ message: error.message || "Ha ocurrido un error" });
   }
 };

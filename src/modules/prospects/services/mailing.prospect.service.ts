@@ -159,13 +159,15 @@ export const sendQuestionToAdminEmailService = async ({
 export const sendAnswerToProspectEmailService = async ({
   to,
   subject,
+  question,
   answer,
 }: {
   to: string;
   subject: string;
+  question: string;
   answer: string;
 }) => {
-  const { html, text } = createResponseEmail({ answer, })
+  const { html, text } = createResponseEmail({ answer,question })
 
   const mailOptions = {
     from: env.EMAIL_USER,

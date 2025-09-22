@@ -25,6 +25,10 @@ export const getProspectByEmailService = async (email: string, prisma = prismaIn
   const prospect = await prisma.prospects.findFirst({ where: { email } });
   return prospect
 }
+export const getProspectByPhoneService = async (phone: string, prisma = prismaInstance) => {
+  const prospect = await prisma.prospects.findFirst({ where: { phone } });
+  return prospect
+}
 export const getActiveProspectsService = async (mode?: any, prisma = prismaInstance) => {
   let prospects
   if (mode == "all")

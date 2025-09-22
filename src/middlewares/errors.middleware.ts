@@ -4,18 +4,9 @@ import { env } from "../config/env"
 
 
 export function errorLogger(err: Error, req: Request, res: Response,) {
-  console.log(req.body);
-  const error = {
-    message: err.message,
-    stack: err.stack,
-    method: req.method,
-    url: req.originalUrl,
-    body: req.body,
-    cookies: req.cookies,
-  }
   logger.error(
-    error,
+    err,
     'Unhandled Error'
   );
-  res.status(500).json({ errorMessage: 'Algo salió mal', ...(env.NODE_ENV !== "production" && error) });
+  res.status(500).json({ errorMessage: 'Algo salió mal' });
 }
