@@ -42,7 +42,7 @@ export const downloadZipController = async (req: Request, res: Response) => {
     // Si el cliente corta, cancelamos lectura para no seguir bajando blobs
     res.on("close", () => {
       if (!res.writableEnded) {
-        try { zipStream.destroy(); } catch {}
+        try { zipStream.destroy(); } catch { }
       }
     });
 
@@ -64,7 +64,7 @@ export const moveFileController = async (req: Request, res: Response) => {
   }
 };
 export const uploadFileController = async (req: Request, res: Response) => {
-  const { prospect } = req.body;
+  const { prospect, type } = req.body;
 
   try {
     if (!req.file) throw new Error("Archivo no recibido");
@@ -72,7 +72,8 @@ export const uploadFileController = async (req: Request, res: Response) => {
       localPath: req.file.path,
       originalName: req.file.originalname,
       mimeType: req.file.mimetype,
-      prospect: JSON.parse(prospect)
+      prospect: JSON.parse(prospect),
+      type
     });
 
     res.status(200).json(result);

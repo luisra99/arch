@@ -83,7 +83,7 @@ export const uploadBase64FileService = async ({
   return { path, url };
 };
 
-export const getFolderZipStreamService = async (folder: string,name:string) => {
+export const getFolderZipStreamService = async (folder: string, name: string) => {
   const { data, error } = await supabase
     .storage
     .from(env.SUPABASE_BUCKET_NAME!)
@@ -119,14 +119,15 @@ export const uploadProspectFileService = async ({
   localPath,
   originalName,
   mimeType,
-  prospect
+  prospect,
+  type
 }: {
   localPath: string;
   originalName: string;
   mimeType: string;
-
+  type: string,
   prospect: {
-    id?:string;
+    id?: string;
     fullName?: string;
     address?: string;
     email?: string;
@@ -134,14 +135,14 @@ export const uploadProspectFileService = async ({
     createdAt: Date;
   };
 }, prisma = prismaInstance) => {
-  if(!prospect.id){
-    const {id} =await prisma.prospects.create({data:prospect})
-    prospect.id=id
+  if (!prospect.id) {
+    const { id } = await prisma.prospects.create({ data: prospect })
+    prospect.id = id
   }
   const ext = originalName.split(".").pop() || "bin";
-  const type = getFileTypeFromExtension(ext); // "image", "video", etc.
+  // const type = getFileTypeFromExtension(ext); // "image", "video", etc.
   const safeName = sanitizeFilename(originalName);
-  const storagePath = `${prospect.id}/${type}s/${safeName}`;
+  const storagePath = `${prospect.id}/${type}/${safeName}`;
   const fileBuffer = readFileSync(localPath);
 
   const { error } = await supabase.storage
@@ -158,7 +159,7 @@ export const uploadProspectFileService = async ({
     .from(env.SUPABASE_BUCKET_NAME!)
     .getPublicUrl(storagePath).data.publicUrl;
 
-  return { path: storagePath, url: publicUrl,id:prospect.id };
+  return { path: storagePath, url: publicUrl, id: prospect.id };
 };
 
 export const deleteFileService = async (path: string) => {
@@ -170,7 +171,7 @@ export const deleteFileService = async (path: string) => {
 };
 
 export const renameFileService = async (oldPath: string, newPath: string) => {
-  console.log("newPath",newPath,oldPath)
+  console.log("newPath", newPath, oldPath)
   const { data: download, error: downloadErr } = await supabase.storage
     .from(env.SUPABASE_BUCKET_NAME!)
     .download(oldPath);
@@ -211,7 +212,7 @@ export const moveFileOrFolderService = async (from: string, to: string) => {
       .from(env.SUPABASE_BUCKET_NAME!)
       .move(from, `${to}/${from.split("/").pop()}`);
 
-    if (move.error) throw new AppError(move.error.message+" moviendo archivo", 500);
+    if (move.error) throw new AppError(move.error.message + " moviendo archivo", 500);
     return;
   }
 
@@ -225,6 +226,6 @@ export const moveFileOrFolderService = async (from: string, to: string) => {
       .from(env.SUPABASE_BUCKET_NAME!)
       .move(sourcePath, destPath);
 
-    if (move.error) throw new AppError(move.error.message+" moviendo carpeta", 500);
+    if (move.error) throw new AppError(move.error.message + " moviendo carpeta", 500);
   }
 };
