@@ -9,7 +9,7 @@ import { sendUnattendedProspectsEmailService } from "./modules/prospects/service
 import logger from "./libs/logger";
 import { env } from "./config/env"
 import { errorLogger } from "./middlewares/errors.middleware";
-
+import cookieParser from "cookie-parser";
 const os = require("os");
 const cluster = require("cluster");
 
@@ -30,7 +30,7 @@ if (cluster.isMaster) {
 } else {
   cron.schedule("30 11 * * *", () => sendUnattendedProspectsEmailService()); // 11:30 PM
   cron.schedule("30 07 * * *", () => sendUnattendedProspectsEmailService()); // 07:30 AM
-
+  app.use(cookieParser())
   app.use(AuthRoute);
   app.use(authenticate,Prospects);
   app.use(authenticate,ProspectsFiles);
