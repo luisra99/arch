@@ -32,8 +32,8 @@ if (cluster.isMaster) {
   cron.schedule("30 07 * * *", () => sendUnattendedProspectsEmailService()); // 07:30 AM
 
   app.use(AuthRoute);
-  app.use(Prospects);
-  app.use(ProspectsFiles);
+  app.use(authenticate,Prospects);
+  app.use(authenticate,ProspectsFiles);
   app.use(authenticate, Common);
 
   app.use(errorLogger);
