@@ -8,8 +8,8 @@ export const authenticate = (
   next: NextFunction
 ) => {
   try {
-    const { token } = req.cookies;
-    console.log(JSON.stringify(req.cookies));
+    const { headers:{authorization} } = req;
+    const token=authorization?.split(" ")?.[1]
     if (!token) {
       return res
         .status(401)
@@ -25,8 +25,8 @@ export const authenticate = (
         .json({ error: "Invalid token" });
     }
     req.body.user = payload;
-    const headers = new Headers({ token: newToken });
-    res.setHeaders(headers);
+    const header = new Headers({ token: newToken });
+    res.setHeaders(header);
     next();
   } catch (error: any) {
     logger.error(error.stack + " " + req);

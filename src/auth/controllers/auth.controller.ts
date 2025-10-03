@@ -80,7 +80,6 @@ export const signInWithGoogle = async (req: Request, res: Response) => {
         console.log('User Info:', userInfo);
         const token = generateToken({ id: userInfo.sub, email: userInfo.email, name: userInfo.name, picture: userInfo.picture });
         userInfo.token = token
-        res.cookie("token", token,{httpOnly:true})
         res.status(200).json(userInfo);
     } catch (error) {
         console.log(error)
